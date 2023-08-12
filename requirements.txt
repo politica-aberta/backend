@@ -1,0 +1,8 @@
+llama-index
+transformers
+cohere
+openai
+chromadb
+pypdf
+tiktoken
+weaviate-client
