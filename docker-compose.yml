@@ -1,17 +1,16 @@
----
 version: '3.4'
 services:
   weaviate:
     command:
-    - --host
-    - 0.0.0.0
-    - --port
-    - '8080'
-    - --scheme
-    - http
+      - --host
+      - 0.0.0.0
+      - --port
+      - '8080'
+      - --scheme
+      - http
     image: semitechnologies/weaviate:1.20.5
     ports:
-    - 8080:8080
+      - 8080:8080
     restart: on-failure:0
     environment:
       QUERY_DEFAULTS_LIMIT: 25
@@ -20,4 +19,14 @@ services:
       DEFAULT_VECTORIZER_MODULE: 'none'
       ENABLE_MODULES: ''
       CLUSTER_HOSTNAME: 'node1'
-...
+
+  flask:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 5000:5000
+    environment:
+      FLASK_APP: app.py
+      FLASK_RUN_HOST: 0.0.0.0
+      FLASK_RUN_PORT: 5000

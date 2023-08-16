@@ -6,3 +6,6 @@ chromadb
 pypdf
 tiktoken
 weaviate-client
+flask
+nltk
+requests
