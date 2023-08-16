@@ -5,7 +5,7 @@ class PoliticalPartyName(Enum):
     PSD = "Partido Social Democrata"
     # CHEGA = "Partido Chega"
     # PAN = "Pessoas - Animais - Natureza"
-    # LIVRE = "Partido Livre"
+    LIVRE = "Partido Livre"
     # BE = "Bloco de Esquerda"
     # IL = "Iniciativa Liberal"
     # PCP = "Partido Comunista Português"
@@ -21,12 +21,12 @@ class PoliticalParty:
 
 
 class Conversation:
-    def __init__(self, conversation_id: int, political_party: PoliticalParty):
+    def __init__(self, conversation_id: int, political_party: PoliticalParty, similarity_top_k: int):
         self.conversation_id = conversation_id
-        self.chat_engine = political_party.index.as_chat_engine(chat_mode="context")
+        self.chat_engine = political_party.index.as_chat_engine(chat_mode="context", similarity_top_k=similarity_top_k)
 
     def chat(self, prompt):
-        return self.chat_engine.chat(prompt).response
+        return self.chat_engine.chat(prompt)
 
     def __repr__(self):
         return f'Conversation(id={self.conversation_id})'

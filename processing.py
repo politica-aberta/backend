@@ -17,6 +17,7 @@ embed_model = OpenAIEmbedding(embed_batch_size=500)
 llm = OpenAI(model="gpt-3.5-turbo-16k")
 service_context = ServiceContext.from_defaults(llm=llm, embed_model=embed_model)
 weviate_url = "http://weaviate:8080"
+SIMILARITY_TOP_K = 5
 
 # Global Variables
 
@@ -67,14 +68,15 @@ def initialize_indexes():
 
 def process_query(id, political_party_name, query_text):
     if id not in active_conversations:
-        active_conversations[id] = Conversation(id, all_political_parties[political_party_name])
+        active_conversations[id] = Conversation(id, all_political_parties[political_party_name], SIMILARITY_TOP_K)
     
-    answer = active_conversations[id].chat(query_text)    
+    raw_answer = active_conversations[id].chat(query_text)    
     
-    # Dummy response for demonstration purposes
-    coordinates = {'x': 123, 'y': 456}
+    reply = raw_answer.response
 
-    return coordinates, answer
+    coordinates = list(map(lambda x: x.node.metadata, raw_answer.source_nodes))
+
+    return coordinates, reply
 
 
 def finish_conversation(conversation_id):
