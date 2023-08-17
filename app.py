@@ -2,9 +2,6 @@ from flask import Flask, request, jsonify
 from processing import *
 from models import *
 import warnings
-import os
-
-# os.environ["OPENAI_API_KEY"] = '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'
 
 app = Flask(__name__)
 
