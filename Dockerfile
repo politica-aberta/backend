@@ -11,13 +11,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy all the other files into the container
 COPY . .
 
-# Set an environment variable for the Flask app
-ENV FLASK_APP=app.py
-ENV FLASK_RUN_HOST=0.0.0.0
-ENV FLASK_RUN_PORT=5000
-
 # Expose the port your Flask app will run on
 EXPOSE 5000
 
-# Start the Flask app
-CMD ["flask", "run"]
+# Start the Flask app with Gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--timeout", "300", "app:app"]

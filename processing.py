@@ -13,9 +13,6 @@ import requests
 # Constants
 
 document_dir = "docs/"
-embed_model = OpenAIEmbedding(embed_batch_size=500)
-llm = OpenAI(model="gpt-3.5-turbo-16k")
-service_context = ServiceContext.from_defaults(llm=llm, embed_model=embed_model)
 weviate_url = "http://weaviate:8080"
 SIMILARITY_TOP_K = 5
 
@@ -36,10 +33,7 @@ def wait_for_weaviate():
 def clean_database():
     db_client = weaviate.Client(weviate_url)
 
-    for val in PoliticalPartyName:
-        party = str(val).split(".")[1]
-
-        db_client.schema.delete_class(party)
+    db_client.schema.delete_all()
 
 def load_document(document_name):
     reader = SimpleDirectoryReader(input_files=[document_name])
@@ -48,6 +42,11 @@ def load_document(document_name):
     return parsed_doc
 
 def docs_to_index(docs, storage_context):
+
+    embed_model = OpenAIEmbedding(embed_batch_size=500)
+    llm = OpenAI(model="gpt-3.5-turbo-16k")
+    service_context = ServiceContext.from_defaults(llm=llm, embed_model=embed_model)
+
     return VectorStoreIndex.from_documents(
         docs["legislativas22"], storage_context=storage_context, # TODO Dirty Fix, only works for one document
         service_context=service_context

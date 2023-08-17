@@ -9,3 +9,5 @@ weaviate-client==3.22.1
 Flask==2.3.2
 nltk==3.6.3
 requests==2.31.0
+gunicorn==20.1.0
+python-dotenv==0.19.2

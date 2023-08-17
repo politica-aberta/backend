@@ -2,10 +2,10 @@ from enum import Enum
 
 class PoliticalPartyName(Enum):
     PS = "Partido Socialista"
-    PSD = "Partido Social Democrata"
+    # PSD = "Partido Social Democrata"
     # CHEGA = "Partido Chega"
     # PAN = "Pessoas - Animais - Natureza"
-    LIVRE = "Partido Livre"
+    # LIVRE = "Partido Livre"
     # BE = "Bloco de Esquerda"
     # IL = "Iniciativa Liberal"
     # PCP = "Partido Comunista Português"
