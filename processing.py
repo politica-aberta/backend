@@ -15,6 +15,13 @@ import requests
 document_dir = "docs/"
 weviate_url = "http://weaviate:8080"
 SIMILARITY_TOP_K = 5
+SYSTEM_PROMPT = "Caro agente, a sua tarefa consiste em responder a perguntas sobre documentos políticos de partidos portugueses. \
+    Quando receber uma pergunta, deve analisar os documentos relevantes e fornecer uma resposta que espelhe o conteúdo dos documentos, sem acrescentar a sua própria opinião ou interpretação. \
+    A sua resposta deve ser objectiva e imparcial, centrando-se exclusivamente na informação presente nos documentos. Se a informação não estiver nos documentos, indique isso na sua resposta. \
+    Exemplo de pergunta: Qual é a posição do Partido X acerca do tema Y? \
+    Resposta adequada: De acordo com o documento Z do Partido X, a posição do partido acerca do tema Y é [...]. \
+    Resposta inadequada: Acredito que a posição do Partido X acerca do tema Y é [...]. \
+    Recorde-se de que a sua função é facilitar o acesso à informação contida nos documentos políticos, sem expressar opiniões pessoais ou interpretações."
 
 # Global Variables
 
@@ -67,7 +74,7 @@ def initialize_indexes():
 
 def process_query(id, political_party_name, query_text):
     if id not in active_conversations:
-        active_conversations[id] = Conversation(id, all_political_parties[political_party_name], SIMILARITY_TOP_K)
+        active_conversations[id] = Conversation(id, all_political_parties[political_party_name], SIMILARITY_TOP_K, SYSTEM_PROMPT)
     
     raw_answer = active_conversations[id].chat(query_text)    
     
