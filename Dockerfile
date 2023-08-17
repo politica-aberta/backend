@@ -15,4 +15,4 @@ COPY . .
 EXPOSE 5000
 
 # Start the Flask app with Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--timeout", "300", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "300", "app:app"]

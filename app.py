@@ -2,7 +2,9 @@ from flask import Flask, request, jsonify
 from processing import *
 from models import *
 import warnings
-from dotenv import load_dotenv, find_dotenv
+import os
+
+os.environ["OPENAI_API_KEY"] = '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'
 
 app = Flask(__name__)
 
@@ -34,7 +36,6 @@ def finish():
 
 
 with app.app_context():
-    load_dotenv(find_dotenv()) # NOT Working
     wait_for_weaviate()
     clean_database() # TODO this should be done when closing the server
     initialize_indexes()
