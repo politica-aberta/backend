@@ -7,6 +7,8 @@ from models import *
 import weaviate
 from llama_index.vector_stores import WeaviateVectorStore
 from llama_index import StorageContext
+from llama_index.indices.composability import ComposableGraph
+from llama_index.indices.keyword_table import GPTKeywordTableIndex
 import time
 import requests
 
@@ -23,10 +25,15 @@ SYSTEM_PROMPT = "Caro agente, a sua tarefa consiste em responder a perguntas sob
     Resposta inadequada: Acredito que a posição do Partido X acerca do tema Y é [...]. \
     Recorde-se de que a sua função é facilitar o acesso à informação contida nos documentos políticos, sem expressar opiniões pessoais ou interpretações."
 
+embed_model = OpenAIEmbedding(embed_batch_size=500)
+llm = OpenAI(model="gpt-3.5-turbo-16k")
+service_context = ServiceContext.from_defaults(llm=llm, embed_model=embed_model)
+
 # Global Variables
 
 active_conversations = {}
 all_political_parties = {}
+graph = {} # TODO Dirty Fix
 
 def wait_for_weaviate():
     while True:
@@ -50,10 +57,6 @@ def load_document(document_name):
 
 def docs_to_index(docs, storage_context):
 
-    embed_model = OpenAIEmbedding(embed_batch_size=500)
-    llm = OpenAI(model="gpt-3.5-turbo-16k")
-    service_context = ServiceContext.from_defaults(llm=llm, embed_model=embed_model)
-
     return VectorStoreIndex.from_documents(
         docs["legislativas22"], storage_context=storage_context, # TODO Dirty Fix, only works for one document
         service_context=service_context
@@ -68,11 +71,42 @@ def initialize_indexes():
         for document in ["legislativas22"]:
             docs[document] = load_document(document_dir + party + "-" + document + ".pdf")
 
-        vector_store = WeaviateVectorStore(weaviate_client=db_client, index_name= party.upper())
-        all_political_parties[val] = PoliticalParty(val, docs_to_index(docs, StorageContext.from_defaults(vector_store=vector_store)))
+        vector_store = WeaviateVectorStore(weaviate_client=db_client, index_name=party.upper())
+        summary = f'Programa eleitoral do {val.value} ({party}) para as legislativas de 2022.' # TODO Dirty Fix, only works for one document
+        all_political_parties[val] = PoliticalParty(val, summary, docs_to_index(docs, StorageContext.from_defaults(vector_store=vector_store)))
 
 
-def process_query(id, political_party_name, query_text):
+def create_composable_graph():
+    db_client = weaviate.Client(weviate_url)
+
+    values = all_political_parties.values()
+
+    indexes = list(map(lambda x: x.index, values))
+    index_summaries = list(map(lambda x: x.summary, values))
+
+    vector_store = WeaviateVectorStore(weaviate_client=db_client, index_name="ComposableGraph") # TODO Hardcoded
+    storage_context = StorageContext.from_defaults(vector_store=vector_store)
+
+    graph["ComposableGraph"] = ComposableGraph.from_indices(                # TODO Dirty Fix
+        GPTKeywordTableIndex,
+        children_indices=indexes,
+        index_summaries=index_summaries,
+        service_context=service_context,
+        storage_context=storage_context
+    ).as_query_engine(system_prompt=SYSTEM_PROMPT)
+
+def process_query_composable_graph(query):
+
+    raw_answer = graph["ComposableGraph"].query(query)
+
+    reply = raw_answer.response
+
+    coordinates = list(map(lambda x: x.node.metadata, raw_answer.source_nodes))
+
+    return coordinates, reply
+
+
+def process_chat(id, political_party_name, query_text):
     if id not in active_conversations:
         active_conversations[id] = Conversation(id, all_political_parties[political_party_name], SIMILARITY_TOP_K, SYSTEM_PROMPT)
     

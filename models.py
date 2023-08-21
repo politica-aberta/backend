@@ -2,7 +2,7 @@ from enum import Enum
 
 class PoliticalPartyName(Enum):
     PS = "Partido Socialista"
-    # PSD = "Partido Social Democrata"
+    PSD = "Partido Social Democrata"
     # CHEGA = "Partido Chega"
     # PAN = "Pessoas - Animais - Natureza"
     # LIVRE = "Partido Livre"
@@ -12,8 +12,9 @@ class PoliticalPartyName(Enum):
 
 class PoliticalParty:
     
-    def __init__(self, party_name: PoliticalPartyName, party_index):
+    def __init__(self, party_name: PoliticalPartyName, summary: str, party_index):
         self.name = party_name
+        self.summary = summary
         self.index = party_index
 
     def __repr__(self):
