@@ -9,8 +9,8 @@ from llama_index.vector_stores import WeaviateVectorStore
 from llama_index import StorageContext
 from llama_index.indices.composability import ComposableGraph
 from llama_index.indices.keyword_table import GPTKeywordTableIndex
-import time
-import requests
+import redis
+
 
 # Constants
 
@@ -35,14 +35,6 @@ active_conversations = {}
 all_political_parties = {}
 graph = {} # TODO Dirty Fix
 
-def wait_for_weaviate():
-    while True:
-        try:
-            response = requests.get('http://weaviate:8080/v1/.well-known/live')
-            if response.status_code == 200:
-                break
-        except requests.exceptions.ConnectionError:
-            time.sleep(5)
 
 def clean_database():
     db_client = weaviate.Client(weviate_url)
@@ -75,6 +67,9 @@ def initialize_indexes():
         summary = f'Programa eleitoral do {val.value} ({party}) para as legislativas de 2022.' # TODO Dirty Fix, only works for one document
         all_political_parties[val] = PoliticalParty(val, summary, docs_to_index(docs, StorageContext.from_defaults(vector_store=vector_store)))
 
+def initialize_redis():
+    r = redis.Redis(host="redis", port=6379, db=0)
+    r.set('chat_counter', 0)
 
 def create_composable_graph():
     db_client = weaviate.Client(weviate_url)
@@ -108,7 +103,7 @@ def process_query_composable_graph(query):
 
 def process_chat(id, political_party_name, query_text):
     if id not in active_conversations:
-        active_conversations[id] = Conversation(id, all_political_parties[political_party_name], SIMILARITY_TOP_K, SYSTEM_PROMPT)
+        raise ValueError("Conversation ID not active")
     
     raw_answer = active_conversations[id].chat(query_text)    
     
@@ -118,6 +113,12 @@ def process_chat(id, political_party_name, query_text):
 
     return coordinates, reply
 
+def start_conversation(political_party):
+    
+    r = redis.Redis(host="localhost", port=6379, db=0)
+    id = r.incr(name='chat_counter')
+    active_conversations[id] = Conversation(id, all_political_parties[political_party], SIMILARITY_TOP_K, SYSTEM_PROMPT)
+    return id
 
 def finish_conversation(conversation_id):
     if conversation_id not in active_conversations:
