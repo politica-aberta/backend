@@ -5,12 +5,24 @@ import warnings
 
 app = Flask(__name__)
 
+@app.route("/start_conversation", methods=["POST"])
+def start():
+    try:
+        data = request.json
+        party = data["party"]
+    except KeyError:
+        return jsonify({"error": "Invalid input data"}), 400
+
+    id = start_conversation(political_party=party)
+
+    return jsonify({"id": id})
+
 
 @app.route("/chat", methods=["POST"])
 def chat():
     try:
         data = request.json
-        id = data["id"]
+        id = int(data["id"])
         chat_text = data["chat"]
     except KeyError:
         return jsonify({"error": "Invalid input data"}), 400
@@ -33,38 +45,25 @@ def query():
     return jsonify({"coordinates": coordinates, "answer": answer})
 
 
-# TODO DELETE
-@app.route("/finish_conversation", methods=["POST"])
-def finish():
+@app.route("/finish_conversation/<int:id>", methods=["DELETE"])
+def finish(id):
     try:
-        data = request.json
-        id = data["id"]
-    except KeyError:
-        return jsonify({"error": "Invalid input data"}), 400
-
-    result = finish_conversation(id)
+        result = finish_conversation(id)
+    except ValueError:
+        return jsonify({"result": "Invalid conversation ID"}), 400
 
     return jsonify({"result": result})
-
-
-@app.route("/start_conversation", methods=["POST"])
-def start():
-    try:
-        data = request.json
-        party = data["party"]
-    except KeyError:
-        return jsonify({"error": "Invalid input data"}), 400
-
-    id = start_conversation(political_party=party)
-
-    return jsonify({"id": id})
+    
 
 
 with app.app_context():
+    warnings.filterwarnings("ignore")  # SOURCE OF ALL EVIL
+    
     wait_for_weaviate()
     wait_for_redis()
-    clean_database()  # TODO this should be done when closing the server
+    
+    clean_weviate_database()  # TODO this should be done when closing the server
     initialize_redis()
     initialize_indexes()
     create_composable_graph()
-    warnings.filterwarnings("ignore")  # SOURCE OF ALL EVIL
+    
