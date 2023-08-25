@@ -10,3 +10,4 @@ requests==2.31.0
 gunicorn==20.1.0
 redis==5.0.0
 pydantic==1.10.9
+supabase==1.0.3

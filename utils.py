@@ -6,8 +6,6 @@ from llama_index import ServiceContext
 from constants import *
 from llama_index import VectorStoreIndex
 
-
-
 def load_documents(documents):
     reader = SimpleDirectoryReader(input_files=documents)
     parsed_doc = reader.load_data()

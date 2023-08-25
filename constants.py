@@ -7,11 +7,13 @@ from models import *
 WEAVIATE_PORT = "8080"
 REDIS_PORT = "6379"
 REDIS_DB = "0"
+SUPABASE_URL = "https://dzwdgfmvuevjqjutrpye.supabase.co"
+SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6d2RnZm12dWV2anFqdXRycHllIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTI5NTcwMTgsImV4cCI6MjAwODUzMzAxOH0.oWDnME53bTI43Y2eHhe1clNgOVV6dcya6-x3ZIGLT9k"
 
 # Base Models
 
 EMBED_MODEL = OpenAIEmbedding(embed_batch_size=500)
-LLM = OpenAI(model="gpt-3.5-turbo-16k")
+LLM = OpenAI(model="gpt-3.5-turbo")
 
 # Prompt Related Constants
 
@@ -25,7 +27,6 @@ SYSTEM_PROMPT = "Caro agente, a sua tarefa consiste em responder a perguntas sob
     Recorde-se de que a sua função é facilitar o acesso à informação contida nos documentos políticos, sem expressar opiniões pessoais ou interpretações."
 
 # Document Data
-
 
 DOCUMENT_DIR = "docs/"
 DOCUMENTS = ["legislativas22"] 
