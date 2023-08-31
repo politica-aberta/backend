@@ -1,5 +1,4 @@
 import weaviate
-import redis
 import os
 from llama_index import SimpleDirectoryReader
 from llama_index import ServiceContext
@@ -14,9 +13,6 @@ def load_documents(documents):
 
 def get_weaviate_client():
     return weaviate.Client(f"http://weaviate:{WEAVIATE_PORT}")
-
-def get_redis_client():
-    return redis.Redis(host="redis", port=REDIS_PORT, db=REDIS_DB)
 
 def get_service_context():
     return ServiceContext.from_defaults(llm=LLM, embed_model=EMBED_MODEL)
@@ -35,9 +31,11 @@ def docs_to_index(docs, storage_context):
 def get_document_path(party_name, document):
     return os.path.join(DOCUMENT_DIR, f"{party_name.lower()}-{document}.pdf")
 
-
 def get_user_id(user):
     return user.user.id
 
 def get_usage(raw_usage):
     return raw_usage.data[0]["usage"]
+
+def get_conversation_id(raw_conversation):
+    return raw_conversation.data[0]["id"]

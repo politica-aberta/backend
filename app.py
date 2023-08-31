@@ -58,13 +58,15 @@ def login():
 def start(**kwargs):
     user = kwargs.get('user')
 
+    user_id = get_user_id(user)
+
     try:
         data = request.json
         party = data["party"]
     except KeyError:
         return jsonify({"error": "Invalid input data"}), 400
 
-    id = start_conversation(political_party=party)
+    id = start_conversation(user_id, party, supabase)
 
     return jsonify({"id": id})
 
@@ -78,7 +80,7 @@ def chat(**kwargs):
 
     try:
         data = request.json
-        conversation_id = int(data["id"])
+        conversation_id = data["id"]
         chat_text = data["chat"]
     except KeyError:
         return jsonify({"error": "Invalid input data"}), 400
@@ -133,10 +135,8 @@ with app.app_context():
     warnings.filterwarnings("ignore")  # SOURCE OF ALL EVIL
     
     wait_for_weaviate()
-    wait_for_redis()
     
     clean_weviate_database()  # TODO this should be done when closing the server
-    initialize_redis()
     initialize_indexes()
     create_composable_graph()
     

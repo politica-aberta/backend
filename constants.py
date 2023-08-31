@@ -5,8 +5,6 @@ from models import *
 # Server Constants
 
 WEAVIATE_PORT = "8080"
-REDIS_PORT = "6379"
-REDIS_DB = "0"
 SUPABASE_URL = "https://dzwdgfmvuevjqjutrpye.supabase.co"
 SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6d2RnZm12dWV2anFqdXRycHllIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTI5NTcwMTgsImV4cCI6MjAwODUzMzAxOH0.oWDnME53bTI43Y2eHhe1clNgOVV6dcya6-x3ZIGLT9k"
 

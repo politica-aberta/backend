@@ -2,17 +2,16 @@ from models import *
 from constants import *
 from utils import *
 
-
-def start_conversation(political_party):
-    redis_client = get_redis_client()
+def start_conversation(user_id, political_party, supabase):
+    conversation = supabase.table(SUPABASE_CONVERSATION_TABLE).insert({"user_id": user_id, "entity": political_party}).execute()
     
-    id = redis_client.incr(name="chat_counter")
+    id = get_conversation_id(conversation)
+
     party = political_party_manager.get(political_party)
     
     conversation_manager.insert(Conversation(id, party, SIMILARITY_TOP_K, SYSTEM_PROMPT))
     
     return id
-
 
 def process_chat(id, query_text):
     conversation = conversation_manager.get(id)

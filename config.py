@@ -1,4 +1,3 @@
-import redis
 import requests
 import time
 
@@ -22,16 +21,6 @@ def wait_for_weaviate():
             time.sleep(5)
 
 
-def wait_for_redis():
-    while True:
-        try:
-            r = get_redis_client()
-            r.ping()
-            break
-        except redis.ConnectionError:
-            time.sleep(5)
-
-
 def initialize_indexes():
     db_client = get_weaviate_client()
 
@@ -48,12 +37,6 @@ def initialize_indexes():
         party.index = docs_to_index(docs, storage_context)
 
         political_party_manager.insert(party)
-
-
-def initialize_redis():
-    # TODO move active conversations to redis
-    redis_client = get_redis_client()
-    redis_client.set("chat_counter", 0)
 
 
 def create_composable_graph():
