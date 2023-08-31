@@ -34,3 +34,10 @@ def docs_to_index(docs, storage_context):
 
 def get_document_path(party_name, document):
     return os.path.join(DOCUMENT_DIR, f"{party_name.lower()}-{document}.pdf")
+
+
+def get_user_id(user):
+    return user.user.id
+
+def get_usage(raw_usage):
+    return raw_usage.data[0]["usage"]

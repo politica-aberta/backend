@@ -10,6 +10,12 @@ REDIS_DB = "0"
 SUPABASE_URL = "https://dzwdgfmvuevjqjutrpye.supabase.co"
 SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6d2RnZm12dWV2anFqdXRycHllIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTI5NTcwMTgsImV4cCI6MjAwODUzMzAxOH0.oWDnME53bTI43Y2eHhe1clNgOVV6dcya6-x3ZIGLT9k"
 
+# Supabase Constants
+
+SUPABASE_USER_TABLE = "user_data"
+SUPABASE_CONVERSATION_TABLE = "conversation_data"
+SUPABASE_POLITICAL_PARTY_TABLE = "political_party_data"
+
 # Base Models
 
 EMBED_MODEL = OpenAIEmbedding(embed_batch_size=500)
@@ -30,6 +36,10 @@ SYSTEM_PROMPT = "Caro agente, a sua tarefa consiste em responder a perguntas sob
 
 DOCUMENT_DIR = "docs/"
 DOCUMENTS = ["legislativas22"] 
+
+# Usage Constants
+
+MAX_USAGE = 1
 
 # Global Variables
 

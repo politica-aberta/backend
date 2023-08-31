@@ -13,12 +13,14 @@ def require_auth(supabase: Client):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            token = request.headers.get("Authorization")
+            token = request.json.get("access_token")
             if not token:
                 return jsonify({"error": "No token provided"}), 401
-            _ , error = supabase.auth.api.get_user(token)
-            if error:
+            try:
+                user = supabase.auth.get_user(token)
+            except Exception as e:
                 return jsonify({"error": "Invalid token"}), 401
+            kwargs['user'] = user
             return f(*args, **kwargs)
         return decorated_function
     return decorator
@@ -27,9 +29,16 @@ def require_auth(supabase: Client):
 def signup():
     email = request.json.get("email")
     password = request.json.get("password")
-    user, error = supabase.auth.sign_up({"email": email, "password": password})
-    if error:
-        return jsonify({"error": error.message}), 400
+    try:
+        supabase.table(SUPABASE_USER_TABLE).insert({"id": get_user_id(user)}).execute()
+
+        user = supabase.auth.sign_up({"email": email, "password": password})
+
+        # TODO there needs to be a rollout in case of problem
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+    
     return jsonify({"message": "Signup successful"}), 201
 
 
@@ -37,15 +46,18 @@ def signup():
 def login():
     email = request.json.get("email")
     password = request.json.get("password")
-    user, error = supabase.auth.sign_in_with_password({"email": email, "password": password})
-    if error:
-        return jsonify({"error": error.message}), 400
-    return jsonify({"message": "Login successful", "user": user}), 200
+    try:
+        res = supabase.auth.sign_in_with_password({"email": email, "password": password})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+    return jsonify({"message": "Login successful", "access_token": res.session.access_token}), 200
 
 
 @app.route("/start_conversation", methods=["POST"])
 @require_auth(supabase)
-def start():
+def start(**kwargs):
+    user = kwargs.get('user')
+
     try:
         data = request.json
         party = data["party"]
@@ -59,22 +71,39 @@ def start():
 
 @app.route("/chat", methods=["POST"])
 @require_auth(supabase)
-def chat():
+def chat(**kwargs):
+    user = kwargs.get('user')
+
+    user_id = get_user_id(user)
+
     try:
         data = request.json
-        id = int(data["id"])
+        conversation_id = int(data["id"])
         chat_text = data["chat"]
     except KeyError:
         return jsonify({"error": "Invalid input data"}), 400
 
-    coordinates, answer = process_chat(id, chat_text)
+
+    usage = get_usage(supabase.table(SUPABASE_USER_TABLE).select("usage").eq("id", user_id).execute())
+
+    if usage >= MAX_USAGE:
+        return jsonify({"error": "No more messages allowed"}), 400
+    else:
+        supabase.table(SUPABASE_USER_TABLE).update({"usage": usage + 1}).eq("id", user_id).execute()
+
+    # FIXME this should be done in a transactional manner
+    # FIXME this should have more advanced error handling
+
+    coordinates, answer = process_chat(conversation_id, chat_text)
 
     return jsonify({"coordinates": coordinates, "answer": answer})
 
 
 @app.route("/query_composable_graph", methods=["POST"])
 @require_auth(supabase)
-def query():
+def query(**kwargs):
+    user = kwargs.get('user')
+
     try:
         data = request.json
         query_text = data["query"]
@@ -88,7 +117,9 @@ def query():
 
 @app.route("/finish_conversation/<int:id>", methods=["DELETE"])
 @require_auth(supabase)
-def finish(id):
+def finish(id, **kwargs):
+    user = kwargs.get('user')
+
     try:
         result = finish_conversation(id)
     except ValueError:
