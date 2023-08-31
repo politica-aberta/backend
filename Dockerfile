@@ -15,7 +15,7 @@ COPY . .
 EXPOSE 5000
 
 # Set the environment variable
-ENV OPENAI_API_KEY="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"
+ENV OPENAI_API_KEY="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"
 
 # Start the Flask app with Gunicorn
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "300", "app:app"]
