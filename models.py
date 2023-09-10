@@ -1,4 +1,6 @@
 from llama_index import VectorStoreIndex
+from llama_index.llms import ChatMessage
+
 
 
 parties = {
@@ -71,4 +73,6 @@ class Conversation:
         )
 
     def chat(self, prompt, previous_messages):
-        return self.chat_engine.chat(prompt, chat_history=previous_messages)
+        prefix_messages = [ChatMessage(role=message["role"], content=message["content"]) for message in previous_messages]
+
+        return self.chat_engine.chat(prompt, chat_history=prefix_messages)
