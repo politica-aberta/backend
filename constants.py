@@ -4,7 +4,6 @@ from models import *
 
 # Server Constants
 
-WEAVIATE_PORT = "8080"
 SUPABASE_URL = "https://dzwdgfmvuevjqjutrpye.supabase.co"
 SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6d2RnZm12dWV2anFqdXRycHllIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTI5NTcwMTgsImV4cCI6MjAwODUzMzAxOH0.oWDnME53bTI43Y2eHhe1clNgOVV6dcya6-x3ZIGLT9k"
 
@@ -13,6 +12,12 @@ SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 SUPABASE_USER_TABLE = "user_data"
 SUPABASE_CONVERSATION_TABLE = "conversation_data"
 SUPABASE_POLITICAL_PARTY_TABLE = "political_party_data"
+SUPABASE_POSTGRES_USER = "postgres"
+SUPABASE_POSTGRES_PASSWORD = "W9vo3k*BbfJj"
+SUPABASE_POSTGRES_HOST = "db.dzwdgfmvuevjqjutrpye.supabase.co"
+SUPABASE_POSTGRES_PORT = "5432"
+SUPABASE_POSTGRES_DB_NAME = "postgres"
+SUPABASE_POSTGRES_CONNECTION_STRING = f"postgresql://{SUPABASE_POSTGRES_USER}:{SUPABASE_POSTGRES_PASSWORD}@{SUPABASE_POSTGRES_HOST}:{SUPABASE_POSTGRES_PORT}/{SUPABASE_POSTGRES_DB_NAME}"
 
 # Base Models
 
@@ -35,12 +40,6 @@ SYSTEM_PROMPT = "Caro agente, a sua tarefa consiste em responder a perguntas sob
 DOCUMENT_DIR = "docs/"
 DOCUMENTS = ["legislativas22"] 
 
-# Usage Constants
-
-MAX_USAGE = 1
-
 # Global Variables
 
-conversation_manager = ConversationManager()
 political_party_manager = PoliticalPartyManager()
-graph = {}  # TODO Dirty Fix

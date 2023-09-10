@@ -3,13 +3,13 @@ from llama_index import VectorStoreIndex
 
 parties = {
     "PS": "Partido Socialista",
-    "PSD": "Partido Social Democrata"
-    # "CHEGA": "Partido Chega",
-    # "PAN": "Pessoas - Animais - Natureza",
-    # "LIVRE": "Partido Livre",
-    # "BE": "Bloco de Esquerda",
-    # "IL": "Iniciativa Liberal",
-    # "PCP": "Partido Comunista Português"
+    "PSD": "Partido Social Democrata",
+    "CHEGA": "Partido Chega",
+    "PAN": "Pessoas - Animais - Natureza",
+    "LIVRE": "Partido Livre",
+    "BE": "Bloco de Esquerda",
+    "IL": "Iniciativa Liberal",
+    "PCP": "Partido Comunista Português"
 }
 
 
@@ -60,49 +60,15 @@ class PoliticalPartyManager:
 class Conversation:
     def __init__(
         self,
-        conversation_id: int,
         political_party: PoliticalParty,
         similarity_top_k: int,
         system_prompt: str,
     ):
-        self.conversation_id = conversation_id
         self.chat_engine = political_party.index.as_chat_engine(
             chat_mode="context",
             similarity_top_k=similarity_top_k,
             system_prompt=system_prompt,
         )
 
-    def chat(self, prompt):
-        return self.chat_engine.chat(prompt)
-
-    def __repr__(self):
-        return f"Conversation(id={self.conversation_id})"
-
-    def __del__(self):
-        self.chat_engine.reset()
-
-
-class ConversationManager:
-    def __init__(self):
-        self.conversations = {}
-
-    def insert(self, conversation):
-        id = conversation.conversation_id
-
-        if id in self.conversations:
-            raise ValueError("Conversation ID already exists")
-        
-        self.conversations[id] = conversation
-
-    def get(self, conversation_id):
-        if conversation_id not in self.conversations:
-            raise ValueError("Conversation ID does not exist")
-        return self.conversations[conversation_id]
-    
-    def delete(self, conversation_id):
-        if conversation_id not in self.conversations:
-            raise ValueError("Conversation ID does not exist")
-        del self.conversations[conversation_id]
-
-    def __del__(self):
-        self.conversations.clear()
+    def chat(self, prompt, previous_messages):
+        return self.chat_engine.chat(prompt, chat_history=previous_messages)
