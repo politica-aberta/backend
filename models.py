@@ -1,6 +1,7 @@
 from llama_index import VectorStoreIndex
 from llama_index.llms import ChatMessage
-
+from llama_index.chat_engine import SimpleChatEngine
+from llama_index.memory import ChatMemoryBuffer
 
 
 parties = {
@@ -16,18 +17,10 @@ parties = {
 
 
 class PoliticalParty:
-    name: str
-    full_name: str
-    summary: str
-    index: VectorStoreIndex
-
-    def __init__(self, party_name: str, party_full_name: str):
+    def __init__(self, party_name, index):
         self.name = party_name
         self.full_name = parties[party_name]
-        self.summary = f"Programa eleitoral do {party_full_name} ({party_name}) para as legislativas de 2022."
-
-    def __repr__(self):
-        return f"PoliticalParty(name={self.name.value}, docs={list(self.index_store)})"
+        self.index = index
 
 
 class PoliticalPartyManager:
@@ -62,15 +55,24 @@ class PoliticalPartyManager:
 class Conversation:
     def __init__(
         self,
-        political_party: PoliticalParty,
-        similarity_top_k: int,
-        system_prompt: str,
+        chat_mode,
+        political_party = None,
+        similarity_top_k = None,
+        system_prompt = None,
+        node_postprocessors=None,
+        service_context=None,
+        previous_messages_token_limit=None
     ):
-        self.chat_engine = political_party.index.as_chat_engine(
-            chat_mode="context",
-            similarity_top_k=similarity_top_k,
-            system_prompt=system_prompt,
-        )
+        if chat_mode == "context":
+            self.chat_engine = political_party.index.as_chat_engine(
+                chat_mode=chat_mode,
+                similarity_top_k=similarity_top_k,
+                system_prompt=system_prompt,
+                node_postprocessors=node_postprocessors,
+                memory=ChatMemoryBuffer.from_defaults(token_limit=previous_messages_token_limit)
+            )
+        elif chat_mode == "simple":
+            self.chat_engine = SimpleChatEngine.from_defaults(service_context=service_context, memory=ChatMemoryBuffer.from_defaults(token_limit=previous_messages_token_limit))
 
     def chat(self, prompt, previous_messages):
         prefix_messages = [ChatMessage(role=message["role"], content=message["content"]) for message in previous_messages]

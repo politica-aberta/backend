@@ -14,7 +14,7 @@ def populate_vector_database():
         collection_name=name,
         )
 
-        docs = load_documents([get_document_path(name, doc) for doc in DOCUMENTS])
+        docs = load_documents([get_document_path(name, doc) for doc in DOCUMENTS], f"Programa eleitoral do {name} para as eleições legislativas de 2022.")
 
         storage_context = StorageContext.from_defaults(vector_store=vector_store)
         _ = docs_to_index(docs, storage_context)

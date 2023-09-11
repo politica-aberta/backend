@@ -1,9 +1,9 @@
 from flask import Flask, request, jsonify
 from processing import *
 from config import *
-import warnings
 from supabase import create_client, Client
 from functools import wraps
+import logging
 
 app = Flask(__name__)
 
@@ -36,16 +36,15 @@ def chat(**kwargs):
         political_party = data["political_party"]
         chat_text = data["chat"]
         previous_messages = data["previous_messages"]
+        infer_chat_mode = data["infer_chat_mode"]
     except KeyError:
         return jsonify({"error": "Invalid input data"}), 400
 
-    coordinates, answer = process_chat(political_party, chat_text, previous_messages)
+    coordinates, answer = process_chat(political_party, chat_text, previous_messages, infer_chat_mode)
 
     return jsonify({"coordinates": coordinates, "answer": answer})
 
 
 with app.app_context():
-    warnings.filterwarnings("ignore")  # SOURCE OF ALL EVIL
-    
     initialize_indexes()
     

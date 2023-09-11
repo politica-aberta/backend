@@ -14,8 +14,8 @@ def initialize_indexes():
         collection_name=name,
         )
 
-        party = PoliticalParty(name, fullname)
+        index = VectorStoreIndex.from_vector_store(vector_store=vector_store, service_context=service_context)
 
-        party.index = VectorStoreIndex.from_vector_store(vector_store=vector_store, service_context=get_service_context())
+        party = PoliticalParty(name, index)
 
         political_party_manager.insert(party)

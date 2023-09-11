@@ -1,23 +1,19 @@
 import os
 from llama_index import SimpleDirectoryReader
-from llama_index import ServiceContext
 from constants import *
 from llama_index import VectorStoreIndex
 
-def load_documents(documents):
-    reader = SimpleDirectoryReader(input_files=documents)
+def load_documents(documents, description):
+    reader = SimpleDirectoryReader(input_files=documents, extra_info={"description": description})
     parsed_doc = reader.load_data()
 
     return parsed_doc
-
-def get_service_context():
-    return ServiceContext.from_defaults(llm=LLM, embed_model=EMBED_MODEL)
 
 def docs_to_index(docs, storage_context):
     return VectorStoreIndex.from_documents(
         docs,
         storage_context=storage_context,
-        service_context=get_service_context(),
+        service_context=service_context,
     )
 
 def get_document_path(party_name, document):

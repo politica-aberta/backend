@@ -1,5 +1,6 @@
 from llama_index.llms import OpenAI
 from llama_index.embeddings.openai import OpenAIEmbedding
+from llama_index import ServiceContext
 from models import *
 
 # Server Constants
@@ -34,6 +35,13 @@ SYSTEM_PROMPT = "Caro agente, a sua tarefa consiste em responder a perguntas sob
     Resposta adequada: De acordo com o documento Z do Partido X, a posição do partido acerca do tema Y é [...]. \
     Resposta inadequada: Acredito que a posição do Partido X acerca do tema Y é [...]. \
     Recorde-se de que a sua função é facilitar o acesso à informação contida nos documentos políticos, sem expressar opiniões pessoais ou interpretações."
+DECISION_TEMPLATE = "Para determinar o modo de resposta mais adequado, responde apenas com \"simple\" ou \"context\". \n \
+    Se a mensagem está diretamente relacionada com informações contidas nos documentos sobre partidos políticos, responda com \"context\". \n \
+    Se a mensagem aparenta estar relacionada apenas com a conversa em si e não requer informações dos documentos políticos, responda com \"simple\". \n \
+    Se nenhuma das opções acima se aplicar claramente, opte por responder com \"context\" para minimizar falsos positivos. \n \
+    A mensagem é a seguinte: \n \
+    {message}"
+TOKEN_LIMIT = 1000
 
 # Document Data
 
@@ -43,3 +51,4 @@ DOCUMENTS = ["legislativas22"]
 # Global Variables
 
 political_party_manager = PoliticalPartyManager()
+service_context = ServiceContext.from_defaults(llm=LLM, embed_model=EMBED_MODEL)
