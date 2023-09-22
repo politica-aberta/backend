@@ -3,6 +3,8 @@ from processing import *
 from config import *
 from supabase import create_client, Client
 from functools import wraps
+from flask import Response, stream_with_context
+import json
 import logging
 
 app = Flask(__name__)
@@ -43,6 +45,33 @@ def chat(**kwargs):
     coordinates, answer = process_chat(political_party, chat_text, previous_messages, infer_chat_mode)
 
     return jsonify({"coordinates": coordinates, "answer": answer})
+
+
+@app.route("/stream-chat", methods=["POST"])
+@require_auth(supabase)
+def stream_chat(**kwargs):
+    user = kwargs.get('user')
+    user_id = get_user_id(user)
+
+    try:
+        data = request.json
+        political_party = data["political_party"]
+        chat_text = data["chat"]
+        previous_messages = data["previous_messages"]
+        infer_chat_mode = data["infer_chat_mode"]
+    except KeyError:
+        return jsonify({"error": "Invalid input data"}), 400
+
+    coordinates, answer = process_chat(political_party, chat_text, previous_messages, infer_chat_mode, stream=True)
+
+    def generate_stream_chat_response(coordinates, answer):
+        yield '{"coordinates":' + json.dumps(coordinates) + ',"answer":"'
+        for part in answer:
+            yield part.replace('"', '\\"')
+        yield '"}'
+
+    return Response(stream_with_context(generate_stream_chat_response(coordinates, answer)))            # Minor issue with different formatting (not encoded)
+
 
 
 with app.app_context():

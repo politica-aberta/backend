@@ -34,7 +34,9 @@ SYSTEM_PROMPT = "Caro agente, a sua tarefa consiste em responder a perguntas sob
     Exemplo de pergunta: Qual é a posição do Partido X acerca do tema Y? \
     Resposta adequada: De acordo com o documento Z do Partido X, a posição do partido acerca do tema Y é [...]. \
     Resposta inadequada: Acredito que a posição do Partido X acerca do tema Y é [...]. \
-    Recorde-se de que a sua função é facilitar o acesso à informação contida nos documentos políticos, sem expressar opiniões pessoais ou interpretações."
+    Recorde-se de que a sua função é facilitar o acesso à informação contida nos documentos políticos, sem expressar opiniões pessoais ou interpretações.\
+    Se no contexto enviado não se encontrar a informação necessária para a resposta, indica que não conseguiste encontrar essa informação no documento"
+
 DECISION_TEMPLATE = "Para determinar o modo de resposta mais adequado, responde apenas com \"simple\" ou \"context\". \n \
     Se a mensagem está diretamente relacionada com informações contidas nos documentos sobre partidos políticos, responda com \"context\". \n \
     Se a mensagem aparenta estar relacionada apenas com a conversa em si e não requer informações dos documentos políticos, responda com \"simple\". \n \

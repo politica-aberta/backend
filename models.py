@@ -72,9 +72,14 @@ class Conversation:
                 memory=ChatMemoryBuffer.from_defaults(token_limit=previous_messages_token_limit)
             )
         elif chat_mode == "simple":
-            self.chat_engine = SimpleChatEngine.from_defaults(service_context=service_context, memory=ChatMemoryBuffer.from_defaults(token_limit=previous_messages_token_limit))
+            self.chat_engine = SimpleChatEngine.from_defaults(system_prompt=system_prompt, service_context=service_context, memory=ChatMemoryBuffer.from_defaults(token_limit=previous_messages_token_limit))
 
     def chat(self, prompt, previous_messages):
         prefix_messages = [ChatMessage(role=message["role"], content=message["content"]) for message in previous_messages]
 
         return self.chat_engine.chat(prompt, chat_history=prefix_messages)
+    
+    def stream_chat(self, prompt, previous_messages):
+        prefix_messages = [ChatMessage(role=message["role"], content=message["content"]) for message in previous_messages]
+
+        return self.chat_engine.stream_chat(prompt, chat_history=prefix_messages)
