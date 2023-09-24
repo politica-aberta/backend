@@ -17,4 +17,4 @@ jobs:
 
 
 stack_destroy: true
-  tf_state_bucket_destroy: true
+tf_state_bucket_destroy: true
