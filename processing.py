@@ -1,40 +1,38 @@
 from models import *
 from constants import *
+from postprocessor import *
 from utils import *
 
-def start_conversation(user_id, political_party, supabase):
-    conversation = supabase.table(SUPABASE_CONVERSATION_TABLE).insert({"user_id": user_id, "entity": political_party}).execute()
-    
-    id = get_conversation_id(conversation)
-
+def process_chat(political_party, chat_text, previous_messages, infer_chat_mode_flag, stream=False):
     party = political_party_manager.get(political_party)
-    
-    conversation_manager.insert(Conversation(id, party, SIMILARITY_TOP_K, SYSTEM_PROMPT))
-    
-    return id
 
-def process_chat(id, query_text):
-    conversation = conversation_manager.get(id)
+    if infer_chat_mode_flag:
+        conversation = Conversation(infer_chat_mode(chat_text, previous_messages), political_party=party, similarity_top_k=SIMILARITY_TOP_K, system_prompt=SYSTEM_PROMPT, node_postprocessors=[ExcludeMetadataKeysNodePostprocessor()], previous_messages_token_limit=TOKEN_LIMIT, service_context=service_context)
 
-    raw_answer = conversation.chat(query_text)
+    else:
+        conversation = Conversation("context", political_party=party, similarity_top_k=SIMILARITY_TOP_K, system_prompt=SYSTEM_PROMPT, node_postprocessors=[ExcludeMetadataKeysNodePostprocessor()], previous_messages_token_limit=TOKEN_LIMIT)
+
+    if stream:
+        raw_answer = conversation.stream_chat(chat_text, previous_messages)
+        reply = raw_answer.response_gen
+
+    else:
+        raw_answer = conversation.chat(chat_text, previous_messages)
+        reply = raw_answer.response
     
-    reply = raw_answer.response
     coordinates = list(map(lambda x: x.node.metadata, raw_answer.source_nodes))
     
     return coordinates, reply
 
 
-def process_query_composable_graph(query):
-    raw_answer = graph["ComposableGraph"].query(query)
+def infer_chat_mode(chat_text, previous_messages):
+    conversation = Conversation("simple", previous_messages_token_limit=TOKEN_LIMIT, service_context=service_context)
 
-    reply = raw_answer.response
+    raw_answer = conversation.chat(DECISION_TEMPLATE.format(message=chat_text), []) # CAN BE CHANGED TO IMPROVE PERFORMANCE
+    
+    chat_mode = raw_answer.response
 
-    coordinates = list(map(lambda x: x.node.metadata, raw_answer.source_nodes))
+    if chat_mode == "simple" or chat_mode == "context":
+        return chat_mode
 
-    return coordinates, reply
-
-
-def finish_conversation(conversation_id):
-    conversation_manager.delete(conversation_id)
-
-    return f"Successful deletion of conversation with id {conversation_id}"
+    raise ValueError(f"Mode {chat_mode} does not exist")

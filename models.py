@@ -1,31 +1,26 @@
 from llama_index import VectorStoreIndex
+from llama_index.llms import ChatMessage
+from llama_index.chat_engine import SimpleChatEngine
+from llama_index.memory import ChatMemoryBuffer
 
 
 parties = {
     "PS": "Partido Socialista",
-    "PSD": "Partido Social Democrata"
-    # "CHEGA": "Partido Chega",
-    # "PAN": "Pessoas - Animais - Natureza",
-    # "LIVRE": "Partido Livre",
-    # "BE": "Bloco de Esquerda",
-    # "IL": "Iniciativa Liberal",
-    # "PCP": "Partido Comunista Português"
+    "PSD": "Partido Social Democrata",
+    "CHEGA": "Partido Chega",
+    "PAN": "Pessoas - Animais - Natureza",
+    "LIVRE": "Partido Livre",
+    "BE": "Bloco de Esquerda",
+    "IL": "Iniciativa Liberal",
+    "PCP": "Partido Comunista Português"
 }
 
 
 class PoliticalParty:
-    name: str
-    full_name: str
-    summary: str
-    index: VectorStoreIndex
-
-    def __init__(self, party_name: str, party_full_name: str):
+    def __init__(self, party_name, index):
         self.name = party_name
         self.full_name = parties[party_name]
-        self.summary = f"Programa eleitoral do {party_full_name} ({party_name}) para as legislativas de 2022."
-
-    def __repr__(self):
-        return f"PoliticalParty(name={self.name.value}, docs={list(self.index_store)})"
+        self.index = index
 
 
 class PoliticalPartyManager:
@@ -60,49 +55,31 @@ class PoliticalPartyManager:
 class Conversation:
     def __init__(
         self,
-        conversation_id: int,
-        political_party: PoliticalParty,
-        similarity_top_k: int,
-        system_prompt: str,
+        chat_mode,
+        political_party = None,
+        similarity_top_k = None,
+        system_prompt = None,
+        node_postprocessors=None,
+        service_context=None,
+        previous_messages_token_limit=None
     ):
-        self.conversation_id = conversation_id
-        self.chat_engine = political_party.index.as_chat_engine(
-            chat_mode="context",
-            similarity_top_k=similarity_top_k,
-            system_prompt=system_prompt,
-        )
+        if chat_mode == "context":
+            self.chat_engine = political_party.index.as_chat_engine(
+                chat_mode=chat_mode,
+                similarity_top_k=similarity_top_k,
+                system_prompt=system_prompt,
+                node_postprocessors=node_postprocessors,
+                memory=ChatMemoryBuffer.from_defaults(token_limit=previous_messages_token_limit)
+            )
+        elif chat_mode == "simple":
+            self.chat_engine = SimpleChatEngine.from_defaults(system_prompt=system_prompt, service_context=service_context, memory=ChatMemoryBuffer.from_defaults(token_limit=previous_messages_token_limit))
 
-    def chat(self, prompt):
-        return self.chat_engine.chat(prompt)
+    def chat(self, prompt, previous_messages):
+        prefix_messages = [ChatMessage(role=message["role"], content=message["content"]) for message in previous_messages]
 
-    def __repr__(self):
-        return f"Conversation(id={self.conversation_id})"
-
-    def __del__(self):
-        self.chat_engine.reset()
-
-
-class ConversationManager:
-    def __init__(self):
-        self.conversations = {}
-
-    def insert(self, conversation):
-        id = conversation.conversation_id
-
-        if id in self.conversations:
-            raise ValueError("Conversation ID already exists")
-        
-        self.conversations[id] = conversation
-
-    def get(self, conversation_id):
-        if conversation_id not in self.conversations:
-            raise ValueError("Conversation ID does not exist")
-        return self.conversations[conversation_id]
+        return self.chat_engine.chat(prompt, chat_history=prefix_messages)
     
-    def delete(self, conversation_id):
-        if conversation_id not in self.conversations:
-            raise ValueError("Conversation ID does not exist")
-        del self.conversations[conversation_id]
+    def stream_chat(self, prompt, previous_messages):
+        prefix_messages = [ChatMessage(role=message["role"], content=message["content"]) for message in previous_messages]
 
-    def __del__(self):
-        self.conversations.clear()
+        return self.chat_engine.stream_chat(prompt, chat_history=prefix_messages)
