@@ -17,5 +17,4 @@ jobs:
 
 
 stack_destroy: true
-  # If you wish to delete the auto-generated bucket
   tf_state_bucket_destroy: true
