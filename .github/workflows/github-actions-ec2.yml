@@ -14,7 +14,3 @@ jobs:
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_default_region: eu-west-1
           dot_env: ${{ secrets.DOT_ENV }}
-
-
-stack_destroy: true
-tf_state_bucket_destroy: true
