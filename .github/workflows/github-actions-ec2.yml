@@ -20,6 +20,6 @@ jobs:
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          cd poltiical
+          cd political
           git pull origin main
           docker-compose up -d --build
