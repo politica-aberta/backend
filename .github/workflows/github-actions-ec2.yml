@@ -1,16 +1,25 @@
-name: Basic deploy
+name: Deploy to EC2
+
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  EC2-Deploy:
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - id: deploy
-        uses: bitovi/github-actions-deploy-docker-to-ec2@v0.5.0
-        with:
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_default_region: eu-west-1
-          dot_env: ${{ secrets.DOT_ENV }}
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST_DNS }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          cd poltiical
+          git pull origin main
+          docker-compose up -d --build
