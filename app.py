@@ -11,6 +11,7 @@ app = Flask(__name__)
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
 
+
 def require_auth(supabase: Client):
     def decorator(f):
         @wraps(f)
@@ -22,15 +23,18 @@ def require_auth(supabase: Client):
                 user = supabase.auth.get_user(token)
             except Exception as e:
                 return jsonify({"error": "Invalid token"}), 401
-            kwargs['user'] = user
+            kwargs["user"] = user
             return f(*args, **kwargs)
+
         return decorated_function
+
     return decorator
+
 
 @app.route("/chat", methods=["POST"])
 @require_auth(supabase)
 def chat(**kwargs):
-    user = kwargs.get('user')
+    user = kwargs.get("user")
     user_id = get_user_id(user)
 
     try:
@@ -42,7 +46,9 @@ def chat(**kwargs):
     except KeyError:
         return jsonify({"error": "Invalid input data"}), 400
 
-    coordinates, answer = process_chat(political_party, chat_text, previous_messages, infer_chat_mode)
+    coordinates, answer = process_chat(
+        political_party, chat_text, previous_messages, infer_chat_mode
+    )
 
     return jsonify({"coordinates": coordinates, "answer": answer})
 
@@ -50,7 +56,7 @@ def chat(**kwargs):
 @app.route("/stream-chat", methods=["POST"])
 @require_auth(supabase)
 def stream_chat(**kwargs):
-    user = kwargs.get('user')
+    user = kwargs.get("user")
     user_id = get_user_id(user)
 
     try:
@@ -62,7 +68,9 @@ def stream_chat(**kwargs):
     except KeyError:
         return jsonify({"error": "Invalid input data"}), 400
 
-    coordinates, answer = process_chat(political_party, chat_text, previous_messages, infer_chat_mode, stream=True)
+    coordinates, answer = process_chat(
+        political_party, chat_text, previous_messages, infer_chat_mode, stream=True
+    )
 
     def generate_stream_chat_response(coordinates, answer):
         yield '{"coordinates":' + json.dumps(coordinates) + ',"answer":"'
@@ -70,10 +78,15 @@ def stream_chat(**kwargs):
             yield part.replace('"', '\\"')
         yield '"}'
 
-    return Response(stream_with_context(generate_stream_chat_response(coordinates, answer)))            # Minor issue with different formatting (not encoded)
+    return Response(
+        stream_with_context(generate_stream_chat_response(coordinates, answer))
+    )  # Minor issue with different formatting (not encoded)
 
+
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"status": "OK"})
 
 
 with app.app_context():
     initialize_indexes()
-    
