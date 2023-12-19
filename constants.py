@@ -43,7 +43,7 @@ DECISION_TEMPLATE = "Para determinar o modo de resposta mais adequado, responde 
     Se nenhuma das opções acima se aplicar claramente, opte por responder com \"context\" para minimizar falsos positivos. \n \
     A mensagem é a seguinte: \n \
     {message}"
-TOKEN_LIMIT = 1000
+TOKEN_LIMIT = 5000
 
 # Document Data
 

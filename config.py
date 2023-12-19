@@ -1,9 +1,9 @@
 from llama_index.vector_stores import SupabaseVectorStore
 from llama_index import VectorStoreIndex
 
-from constants import *
-from models import *
-from utils import *
+from constants import SUPABASE_POSTGRES_CONNECTION_STRING, service_context
+from models import  PoliticalParty, parties
+from utils import political_party_manager
 
 def initialize_indexes():
 
