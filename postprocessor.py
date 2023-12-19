@@ -1,4 +1,4 @@
-from llama_index.indices.postprocessor.types import BaseNodePostprocessor
+from llama_index.postprocessor.types import BaseNodePostprocessor  
 
 class ExcludeMetadataKeysNodePostprocessor(BaseNodePostprocessor):
     def postprocess_nodes(
