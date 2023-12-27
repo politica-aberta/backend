@@ -1,8 +1,3 @@
-from llama_index.llms import OpenAI
-from llama_index.embeddings.openai import OpenAIEmbedding
-from llama_index import ServiceContext
-from models import *
-
 # Server Constants
 
 SUPABASE_URL = "https://dzwdgfmvuevjqjutrpye.supabase.co"
@@ -12,6 +7,7 @@ SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 SUPABASE_USER_TABLE = "user_data"
 SUPABASE_CONVERSATION_TABLE = "conversation_data"
+SUPABASE_MESSAGES_TABLE = "messages"
 SUPABASE_POLITICAL_PARTY_TABLE = "political_party_data"
 SUPABASE_POSTGRES_USER = "postgres"
 SUPABASE_POSTGRES_PASSWORD = "W9vo3k*BbfJj"
@@ -20,10 +16,7 @@ SUPABASE_POSTGRES_PORT = "5432"
 SUPABASE_POSTGRES_DB_NAME = "postgres"
 SUPABASE_POSTGRES_CONNECTION_STRING = f"postgresql://{SUPABASE_POSTGRES_USER}:{SUPABASE_POSTGRES_PASSWORD}@{SUPABASE_POSTGRES_HOST}:{SUPABASE_POSTGRES_PORT}/{SUPABASE_POSTGRES_DB_NAME}"
 
-# Base Models
 
-EMBED_MODEL = OpenAIEmbedding(embed_batch_size=500)
-LLM = OpenAI(model="gpt-3.5-turbo")
 
 # Prompt Related Constants
 
@@ -49,8 +42,3 @@ TOKEN_LIMIT = 5000
 
 DOCUMENT_DIR = "docs/"
 DOCUMENTS = ["legislativas22"] 
-
-# Global Variables
-
-political_party_manager = PoliticalPartyManager()
-service_context = ServiceContext.from_defaults(llm=LLM, embed_model=EMBED_MODEL)

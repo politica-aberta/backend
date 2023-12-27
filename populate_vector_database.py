@@ -1,23 +1,44 @@
 from llama_index import StorageContext
 from llama_index.vector_stores import SupabaseVectorStore
 
-from constants import *
-from models import *
-from utils import *
+from llama_index.readers import PDFReader
 
-def populate_vector_database():
 
-    for name, _ in parties.items():
+from constants import SUPABASE_POSTGRES_CONNECTION_STRING
+from models import parties
+from models.party import PoliticalParty
 
-        vector_store = SupabaseVectorStore(
-        postgres_connection_string=SUPABASE_POSTGRES_CONNECTION_STRING,
-        collection_name=name,
-        )
 
-        docs = load_documents([get_document_path(name, doc) for doc in DOCUMENTS], f"Programa eleitoral do {name} para as eleições legislativas de 2022.")
+class DataLoader:
+    loader = PDFReader()
+    
+    def __init__(self):
+        self.all_docs = []
+        self.parties: list[PoliticalParty] = []
+        for key, val in parties.items():
+            self.parties.append(PoliticalParty(party_name=key, index = None))
+    
+    
+    def populate_vector_database(self):
 
-        storage_context = StorageContext.from_defaults(vector_store=vector_store)
-        _ = docs_to_index(docs, storage_context)
+        for party in self.parties:
+                        
+            print(party.name)
+            print("Importing files...")
+            party.import_party_files(reader=self.loader)
+            print("Imported!")
+
+            # docs = load_documents([get_document_path(name, doc) for doc in DOCUMENTS], f"Programa eleitoral do {name} para as eleições legislativas de 2022.")
+            vector_store = SupabaseVectorStore(
+                postgres_connection_string=SUPABASE_POSTGRES_CONNECTION_STRING,
+                collection_name=party.name,
+            )
+            storage_context = StorageContext.from_defaults(vector_store=vector_store)
+            
+            print("generating indices for party")
+            party.generate_index(storage_context=storage_context)
+            
 
 if __name__ == "__main__":
-    populate_vector_database()
+    data_loader = DataLoader()
+    data_loader.populate_vector_database()

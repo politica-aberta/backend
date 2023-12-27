@@ -1,11 +1,12 @@
 from flask import Flask, request, jsonify
-from processing import *
-from config import *
 from supabase import create_client, Client
 from functools import wraps
 from flask import Response, stream_with_context
 import json
-import logging
+from constants import SUPABASE_URL, SUPABASE_ANON_KEY
+from utils import get_user_id
+from config import initialize_indexes
+from processing import process_chat
 
 app = Flask(__name__)
 
@@ -36,7 +37,6 @@ def require_auth(supabase: Client):
 def chat(**kwargs):
     user = kwargs.get("user")
     user_id = get_user_id(user)
-
     try:
         data = request.json
         political_party = data["political_party"]
@@ -50,6 +50,8 @@ def chat(**kwargs):
         political_party, chat_text, previous_messages, infer_chat_mode
     )
 
+    print("coord", coordinates)
+    print("answer", answer)
     return jsonify({"coordinates": coordinates, "answer": answer})
 
 
