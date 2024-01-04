@@ -40,23 +40,32 @@ def process_chat(
         raw_answer = conversation.chat(chat_text, previous_messages)
         answer = raw_answer.response
 
-    pages = list(
-        set(
-            [
-                int(node.node.metadata["page_label"])
-                for node in raw_answer.source_nodes
-                if "page_label" in node.node.metadata
-            ]
-        )
-    )
+    def convert_file_format(path):
+        """some docs have a file format of 'docs/{party}/legislativas22.pdf}
+        while the supposed format is {party.lower()}/legislativas22.pdf}"""
+        supabase_prefix = "https://dzwdgfmvuevjqjutrpye.supabase.co/storage/v1/object/public/documents/"
+        tokens = path.split("/")
+        path = f"{tokens[1].lower()}-{tokens[2]}" if len(tokens) == 3 else path
+        return supabase_prefix + path
+
+    pages = {}
+
+    for node in raw_answer.source_nodes:
+        if "file_name" in node.node.metadata:
+            document = convert_file_format(node.node.metadata["file_name"])
+            if document not in pages:
+                pages[document] = set()
+
+            if "page_label" in node.node.metadata:
+                pages[document].add(int(node.node.metadata["page_label"]))
+
     references = [
         {
             "party": party_name,
-            "document": node.node.metadata["file_name"],
-            "pages": pages,
+            "document": document,
+            "pages": list(pages),
         }
-        for node in raw_answer.source_nodes
-        if "file_name" in node.node.metadata
+        for document, pages in pages.items()
     ]
 
     """ FIXME api is set as 
@@ -73,9 +82,7 @@ def process_chat(
         ie, aggregate by party, then by document
         this is a temporary fix, as we dont support either of these yet
     """
-
     logging.info(references)
-
 
     return answer, references
 

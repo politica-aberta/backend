@@ -20,7 +20,7 @@ SUPABASE_POSTGRES_CONNECTION_STRING = f"postgresql://{SUPABASE_POSTGRES_USER}:{S
 
 # Prompt Related Constants
 
-SIMILARITY_TOP_K = 5
+SIMILARITY_TOP_K = 3
 SYSTEM_PROMPT = "Caro agente, a sua tarefa consiste em responder a perguntas sobre documentos políticos de partidos portugueses. \
     Quando receber uma pergunta, deve analisar os documentos relevantes e fornecer uma resposta que espelhe o conteúdo dos documentos, sem acrescentar a sua própria opinião ou interpretação. \
     A sua resposta deve ser objectiva e imparcial, centrando-se exclusivamente na informação presente nos documentos. Se a informação não estiver nos documentos, indique isso na sua resposta. \
