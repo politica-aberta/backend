@@ -1,0 +1,23 @@
+name: Deploy to Hetzner
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HETZNER_HOST }}
+        username: ${{ secrets.HETZNER_USERNAME }}
+        key: ${{ secrets.HETZNER_SSH_KEY }}
+        script: |
+          sh deploy.sh
