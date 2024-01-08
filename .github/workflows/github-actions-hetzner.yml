@@ -13,7 +13,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Deploy to EC2
+    - name: Deploy to Hetzner
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.HETZNER_HOST }}
