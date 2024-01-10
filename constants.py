@@ -17,7 +17,6 @@ SUPABASE_POSTGRES_DB_NAME = "postgres"
 SUPABASE_POSTGRES_CONNECTION_STRING = f"postgresql://{SUPABASE_POSTGRES_USER}:{SUPABASE_POSTGRES_PASSWORD}@{SUPABASE_POSTGRES_HOST}:{SUPABASE_POSTGRES_PORT}/{SUPABASE_POSTGRES_DB_NAME}"
 
 
-
 # Prompt Related Constants
 
 SIMILARITY_TOP_K = 5
@@ -36,7 +35,7 @@ DECISION_TEMPLATE = "Para determinar o modo de resposta mais adequado, responde 
     Se nenhuma das opções acima se aplicar claramente, opte por responder com \"context\" para minimizar falsos positivos. \n \
     A mensagem é a seguinte: \n \
     {message}"
-TOKEN_LIMIT = 5000
+TOKEN_LIMIT = 10000
 
 # Document Data
 

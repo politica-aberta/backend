@@ -1,3 +1,4 @@
+import logging
 from flask import Flask, request, jsonify
 from supabase import create_client, Client
 from functools import wraps
@@ -39,20 +40,19 @@ def chat(**kwargs):
     user_id = get_user_id(user)
     try:
         data = request.json
-        political_party = data["political_party"]
-        chat_text = data["chat"]
+        logging.info(f"Request data: {data}")
+        chat_text = data["message"]
+        political_party = data["party"]
         previous_messages = data["previous_messages"]
         infer_chat_mode = data["infer_chat_mode"]
     except KeyError:
         return jsonify({"error": "Invalid input data"}), 400
 
-    coordinates, answer = process_chat(
+    answer, references = process_chat(
         political_party, chat_text, previous_messages, infer_chat_mode
     )
 
-    print("coord", coordinates)
-    print("answer", answer)
-    return jsonify({"coordinates": coordinates, "answer": answer})
+    return jsonify({"references": references, "message": answer})
 
 
 @app.route("/stream-chat", methods=["POST"])
