@@ -53,10 +53,10 @@ def multi_chat(**kwargs):
     return jsonify({"references": references, "message": answer})
 
 @app.route("/chat", methods=["POST"])
-# @require_auth(supabase)
+@require_auth(supabase)
 def chat(**kwargs):
-    # user = kwargs.get("user")
-    # user_id = get_user_id(user)
+    user = kwargs.get("user")
+    user_id = get_user_id(user)
     try:
         data = request.json
         logging.info(f"Request data: {data}")
