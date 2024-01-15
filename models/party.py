@@ -1,18 +1,25 @@
 from pathlib import Path
-from llama_index import VectorStoreIndex, StorageContext
+from llama_index import VectorStoreIndex, StorageContext, SummaryIndex
 from llama_index.readers.base import BaseReader
 from llama_index.schema import Document
+from llama_index.tools import QueryEngineTool, ToolMetadata
+from llama_index.agent import OpenAIAgent
+
+
 
 from . import parties
-from globals import service_context
-from constants import DOCUMENTS
+from globals import service_context, LLM
+from constants import DOCUMENTS, ELECTIONS, system_prompt_specific_party
 
 
 class PoliticalParty:
-    def __init__(self, party_name: str, index):
+    def __init__(self, party_name: str, index, summary_index: SummaryIndex | None = None):
         self.name = party_name
         self.full_name = parties[party_name]
         self.index = index
+        self.summary_index = summary_index
+        self.agent = None
+        self.tool = None
         self.docs: list[Document] = []
     
     @staticmethod
@@ -24,6 +31,14 @@ class PoliticalParty:
             show_progress=True
         )
         
+    @staticmethod
+    def docs_to_summary_index(docs) -> SummaryIndex:
+        return SummaryIndex.from_documents(
+            docs,
+            service_context=service_context,
+            show_progress=True
+        )
+        
     def generate_index(self, storage_context: StorageContext):
         index = self.docs_to_index(
             docs = self.docs,
@@ -31,13 +46,68 @@ class PoliticalParty:
         )
         self.index = index
         
+    def generate_summary_index(self):
+        if not self.docs:
+            raise Exception("no docs found!")
+        summary_index = self.docs_to_summary_index(
+            docs = self.docs,
+        )
+        self.summary_index = summary_index
+        
     def import_party_files(self, reader: BaseReader):
         self.docs = []
         for doc in DOCUMENTS:
             out = reader.load_data(
                     file=Path(f"./docs/{self.name}/{doc}.pdf"),
-                    extra_info={"description": f"Programa eleitoral do {self.full_name} para as eleições legislativas de 2022."}
+                    extra_info={"description": f"Programa eleitoral do {self.full_name} para as Eleições {ELECTIONS[doc]}."}
                 )
             self.docs.extend(out)
         # for d in self.docs:
         #     d.metadata = {"year": 2022} # TODO do not hardcode year
+        
+    
+    def set_agent(self):
+        if self.index: # and self.summary_index:
+            query_engine_tools = [
+                QueryEngineTool(
+                    query_engine=self.index.as_query_engine(),
+                    metadata=ToolMetadata(
+                        name="ferramenta_vetores",
+                        description=(
+                            "Útil para questões relacionada com "
+                            f"o programa político do {self.full_name} ({self.name})."
+                        ),
+                    ),
+                ),
+                # QueryEngineTool(
+                #     query_engine=self.summary_index.as_query_engine(),
+                #     metadata=ToolMetadata(
+                #         name="ferramenta_resumo",
+                #         description=(
+                #             "Útil para pedidos que requerem um resumo holístico"
+                #             f"de TUDO sobre o programa político do {self.full_name} ({self.name})."
+                #             " Para seccções mais específicas, por favor use o ferramenta_vetores."
+                #         ),
+                #     ),
+                # ),
+            ]
+            self.agent = OpenAIAgent.from_tools(
+                query_engine_tools,
+                llm=LLM,
+                verbose=True,
+                system_prompt=system_prompt_specific_party(full_name=self.full_name, name=self.name)
+            )
+            
+            summary = (
+                f"Este conteúdo contém o programa político do {self.full_name} ({self.name}). Usa"
+                f" esta ferramenta se queres responder a alguma pergunta sobre o programa político do {self.full_name} ({self.name}).\n"
+            )
+            self.tool = QueryEngineTool(
+                query_engine=self.agent,
+                metadata=ToolMetadata(
+                    name=f"ferramenta_{self.name}",
+                    description=summary,
+                ),
+            )
+        else:
+            raise Exception("Unable to create agent for " + self.name)

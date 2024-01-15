@@ -8,7 +8,7 @@ class Conversation:
     def __init__(
         self,
         chat_mode,
-        party: PoliticalParty = None,# | None = None,
+        party: PoliticalParty | None = None,# | None = None,
         similarity_top_k = None,
         system_prompt = None,
         node_postprocessors=None,
@@ -35,3 +35,33 @@ class Conversation:
         prefix_messages = [ChatMessage(role=message["role"], content=message["message"]) for message in previous_messages]
 
         return self.chat_engine.stream_chat(prompt, chat_history=prefix_messages)
+
+
+# class MultiPartyConversation:
+#     def __init__(
+#         self,
+#         chat_mode,
+#         parties: list[PoliticalParty] | None = None,# | None = None,
+#         node_postprocessors=None,
+#         service_context=None,
+#         previous_messages_token_limit=None
+#     ):
+#         if parties is not None:
+#             raise NotImplementedError("custom multi party is not yet implemented")
+#         self.chat_engine = party.index.as_chat_engine(
+#             chat_mode=chat_mode,
+#             similarity_top_k=similarity_top_k,
+#             system_prompt=system_prompt,
+#             node_postprocessors=node_postprocessors,
+#             memory=ChatMemoryBuffer.from_defaults(token_limit=previous_messages_token_limit)
+#         )
+
+#     def chat(self, prompt, previous_messages):
+#         prefix_messages = [ChatMessage(role=message["role"], content=message["message"]) for message in previous_messages]
+
+#         return self.chat_engine.chat(prompt, chat_history=prefix_messages)
+    
+#     def stream_chat(self, prompt, previous_messages):
+#         prefix_messages = [ChatMessage(role=message["role"], content=message["message"]) for message in previous_messages]
+
+#         return self.chat_engine.stream_chat(prompt, chat_history=prefix_messages)
