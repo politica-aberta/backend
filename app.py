@@ -7,7 +7,7 @@ import json
 from constants import SUPABASE_URL, SUPABASE_ANON_KEY
 from utils import get_user_id
 from config import initialize_indexes
-from processing import process_chat
+from processing import process_chat, process_multi_party_chat
 
 app = Flask(__name__)
 
@@ -33,6 +33,25 @@ def require_auth(supabase: Client):
     return decorator
 
 
+@app.route("/multi-chat", methods=["POST"])
+@require_auth(supabase)
+def multi_chat(**kwargs):
+    user = kwargs.get("user")
+    user_id = get_user_id(user)
+    try:
+        data = request.json
+        logging.info(f"Request data: {data}")
+        chat_text = data["message"]
+        previous_messages = data["previous_messages"]
+        infer_chat_mode = data["infer_chat_mode"]
+    except KeyError:
+        return jsonify({"error": "Invalid input data"}), 400
+    
+    answer, references = process_multi_party_chat(None, chat_text, previous_messages, infer_chat_mode)
+
+
+    return jsonify({"references": references, "message": answer})
+
 @app.route("/chat", methods=["POST"])
 @require_auth(supabase)
 def chat(**kwargs):
@@ -42,12 +61,15 @@ def chat(**kwargs):
         data = request.json
         logging.info(f"Request data: {data}")
         chat_text = data["message"]
-        political_party = data["party"]
+        political_party: str = data["party"]
         previous_messages = data["previous_messages"]
         infer_chat_mode = data["infer_chat_mode"]
     except KeyError:
         return jsonify({"error": "Invalid input data"}), 400
-
+    
+    if not political_party or type(political_party) is not str:
+        return jsonify({"error": "Choose a party"}), 400
+    
     answer, references = process_chat(
         political_party, chat_text, previous_messages, infer_chat_mode
     )
