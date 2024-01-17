@@ -215,6 +215,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 ## Contact
 
 Hugo Pitorro - [xtwigs](https://www.github.com/xtwigs/) - pitorro@politica-aberta.pt
+
 José Martinho - [jmartinhoj](https://www.github.com/jmartinhoj/) - martinho@politica-aberta.pt
 
 Project Link: [https://github.com/politica-aberta/backend](https://github.com/politica-aberta/backend)
