@@ -81,7 +81,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Poítica Aberta screen shot](images/screenshot.png)](https://www.openai.com)
+[![Poítica Aberta screen shot](images/screenshot.png)](https://www.politica-aberta.pt)
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -227,8 +227,6 @@ Project Link: [https://github.com/politica-aberta/backend](https://github.com/po
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-* Many thanks to [Inês Amaro]() for the visual identity.
-...
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
