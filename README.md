@@ -102,7 +102,9 @@
 ## Getting Started
 
 
-This project can be run locally.
+This is the backend of Política Aberta, an open source project to help the Portuguese electors to choose their vote. It acts like a chatbot, where users can ask things to political parties and the answer is based on their political program. 
+
+Feel free to clone this repo, run it locally and contribute!
 
 ### Prerequisites
 
