@@ -2,7 +2,7 @@ from llama_index.chat_engine.types import ChatMode
 import logging
 from models.conversation import Conversation
 from globals import political_party_manager, service_context
-from constants import SIMILARITY_TOP_K, SYSTEM_PROMPT, TOKEN_LIMIT, DECISION_TEMPLATE, system_prompt_specific_party
+from constants import SIMILARITY_TOP_K, TOKEN_LIMIT, DECISION_TEMPLATE, system_prompt_specific_party
 from postprocessor import ExcludeMetadataKeysNodePostprocessor
 
 def get_references(raw_answer, party_name = None):
