@@ -46,11 +46,13 @@ def multi_chat(**kwargs):
         infer_chat_mode = data["infer_chat_mode"]
     except KeyError:
         return jsonify({"error": "Invalid input data"}), 400
-    
-    answer, references = process_multi_party_chat(None, chat_text, previous_messages, infer_chat_mode)
 
+    answer, references = process_multi_party_chat(
+        None, chat_text, previous_messages, infer_chat_mode
+    )
 
     return jsonify({"references": references, "message": answer})
+
 
 @app.route("/chat", methods=["POST"])
 @require_auth(supabase)
@@ -66,10 +68,10 @@ def chat(**kwargs):
         infer_chat_mode = data["infer_chat_mode"]
     except KeyError:
         return jsonify({"error": "Invalid input data"}), 400
-    
+
     if not political_party or type(political_party) is not str:
         return jsonify({"error": "Choose a party"}), 400
-    
+
     answer, references = process_chat(
         political_party, chat_text, previous_messages, infer_chat_mode
     )
@@ -78,10 +80,10 @@ def chat(**kwargs):
 
 
 @app.route("/stream-chat", methods=["POST"])
-@require_auth(supabase)
+# @require_auth(supabase)
 def stream_chat(**kwargs):
-    user = kwargs.get("user")
-    user_id = get_user_id(user)
+    # user = kwargs.get("user")
+    # user_id = get_user_id(user)
 
     try:
         data = request.json
@@ -92,18 +94,18 @@ def stream_chat(**kwargs):
     except KeyError:
         return jsonify({"error": "Invalid input data"}), 400
 
-    coordinates, answer = process_chat(
+    answer, references = process_chat(
         political_party, chat_text, previous_messages, infer_chat_mode, stream=True
     )
 
     def generate_stream_chat_response(coordinates, answer):
-        yield '{"coordinates":' + json.dumps(coordinates) + ',"answer":"'
+        yield '{"references":' + json.dumps(coordinates) + ',"message":"'
         for part in answer:
             yield part.replace('"', '\\"')
         yield '"}'
 
     return Response(
-        stream_with_context(generate_stream_chat_response(coordinates, answer))
+        stream_with_context(generate_stream_chat_response(references, answer))
     )  # Minor issue with different formatting (not encoded)
 
 
