@@ -1,4 +1,5 @@
 from llama_index.chat_engine.types import ChatMode
+from llama_index.llms import ChatMessage
 import logging
 from models.conversation import Conversation
 from globals import political_party_manager, service_context
@@ -40,7 +41,8 @@ def get_references(raw_answer, party_name = None):
 def process_multi_party_chat(parties, chat_text, previous_messages, infer_chat_mode_flag, stream=False):
     if not political_party_manager.multi_party_agent:
         raise Exception("No multi-party agent found.")
-    response = political_party_manager.multi_party_agent.chat(chat_text, previous_messages)
+    prefix_messages = [ChatMessage(role=message["role"], content=message["message"]) for message in previous_messages]
+    response = political_party_manager.multi_party_agent.chat(chat_text, prefix_messages)
     references  = get_references(response)
     return response.response, references
 

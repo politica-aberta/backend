@@ -1,6 +1,6 @@
 from llama_index import VectorStoreIndex
 from llama_index.objects import ObjectIndex, SimpleToolNodeMapping
-from llama_index.agent import FnRetrieverOpenAIAgent
+from llama_index.agent import OpenAIAgent
 from llama_index.tools import QueryEngineTool
 from constants import SYSTEM_PROMPT_MULTI_PARTY, SIMILARITY_TOP_K
 
@@ -52,8 +52,8 @@ class PoliticalPartyManager:
             tool_mapping,
             VectorStoreIndex,
         )
-        self.multi_party_agent = FnRetrieverOpenAIAgent.from_retriever(
-            obj_index.as_retriever(similarity_top_k=3),
+        self.multi_party_agent =  OpenAIAgent.from_tools(
+            tool_retriever=obj_index.as_retriever(similarity_top_k=3),
             system_prompt=SYSTEM_PROMPT_MULTI_PARTY,
             verbose=True,
         )

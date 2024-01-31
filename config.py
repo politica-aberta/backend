@@ -25,7 +25,7 @@ def initialize_indexes():
 
         party = PoliticalParty(name, index)
         
-        party.import_party_files(reader=loader)
+        # party.import_party_files(reader=loader)
         
         # party.generate_summary_index() # TODO: is this neceessary?
         
