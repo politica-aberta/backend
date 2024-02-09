@@ -3,10 +3,16 @@ from llama_index.llms import ChatMessage
 import logging
 from models.conversation import Conversation
 from globals import political_party_manager, service_context
-from constants import SIMILARITY_TOP_K, TOKEN_LIMIT, DECISION_TEMPLATE, system_prompt_specific_party
+from constants import (
+    SIMILARITY_TOP_K,
+    TOKEN_LIMIT,
+    DECISION_TEMPLATE,
+    system_prompt_specific_party,
+)
 from postprocessor import ExcludeMetadataKeysNodePostprocessor
 
-def get_references(raw_answer, party_name = None):
+
+def get_references(raw_answer, party_name=None):
     def convert_file_format(path):
         """some docs have a file format of 'docs/{party}/legislativas22.pdf}
         while the supposed format is {party.lower()}/legislativas22.pdf}"""
@@ -34,20 +40,26 @@ def get_references(raw_answer, party_name = None):
         }
         for party, pages in parties.items()
     ]
-    
+
     return references
 
 
-def process_multi_party_chat(parties, chat_text, previous_messages, infer_chat_mode_flag, stream=False):
+def process_multi_party_chat(
+    parties, chat_text, previous_messages, infer_chat_mode_flag, stream=False
+):
     if not political_party_manager.multi_party_agent:
         raise Exception("No multi-party agent found.")
-    prefix_messages = [ChatMessage(role=message["role"], content=message["message"]) for message in previous_messages]
-    response = political_party_manager.multi_party_agent.query(chat_text)
-    print("################")
-    print(type(response))
-    print("################")
-    references  = get_references(response)
+    prefix_messages = [
+        ChatMessage(role=message["role"], content=message["message"])
+        for message in previous_messages
+    ]
+    response = political_party_manager.multi_party_agent.chat(
+        chat_text, prefix_messages
+    )
+
+    references = get_references(response)
     return response.response, references
+
 
 def process_chat(
     party_name, chat_text, previous_messages, infer_chat_mode_flag, stream=False
@@ -59,7 +71,9 @@ def process_chat(
             infer_chat_mode(chat_text, previous_messages),
             party=party,
             similarity_top_k=SIMILARITY_TOP_K,
-            system_prompt=system_prompt_specific_party(full_name=party.full_name, name = party.name),
+            system_prompt=system_prompt_specific_party(
+                full_name=party.full_name, name=party.name
+            ),
             node_postprocessors=[ExcludeMetadataKeysNodePostprocessor()],
             previous_messages_token_limit=TOKEN_LIMIT,
             service_context=service_context,
@@ -70,7 +84,9 @@ def process_chat(
             ChatMode.CONTEXT,
             party=party,
             similarity_top_k=SIMILARITY_TOP_K,
-            system_prompt=system_prompt_specific_party(full_name=party.full_name, name = party.name),
+            system_prompt=system_prompt_specific_party(
+                full_name=party.full_name, name=party.name
+            ),
             node_postprocessors=[ExcludeMetadataKeysNodePostprocessor()],
             previous_messages_token_limit=TOKEN_LIMIT,
         )
