@@ -5,12 +5,12 @@ from constants import SUPABASE_POSTGRES_CONNECTION_STRING
 from models import parties
 from models.party import PoliticalParty
 from globals import political_party_manager, service_context
-from llama_index.readers import PDFReader
+# from llama_index.readers import PDFReader
 
 
 def initialize_indexes():
     
-    loader = PDFReader()
+    # loader = PDFReader()
 
     for name, fullname in parties.items():
         

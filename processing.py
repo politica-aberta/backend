@@ -42,7 +42,10 @@ def process_multi_party_chat(parties, chat_text, previous_messages, infer_chat_m
     if not political_party_manager.multi_party_agent:
         raise Exception("No multi-party agent found.")
     prefix_messages = [ChatMessage(role=message["role"], content=message["message"]) for message in previous_messages]
-    response = political_party_manager.multi_party_agent.chat(chat_text, prefix_messages)
+    response = political_party_manager.multi_party_agent.query(chat_text)
+    print("################")
+    print(type(response))
+    print("################")
     references  = get_references(response)
     return response.response, references
 

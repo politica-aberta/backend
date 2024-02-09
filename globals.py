@@ -1,7 +1,7 @@
 import os
 
 from llama_index.llms import OpenAI
-from llama_index.embeddings.openai import OpenAIEmbedding
+from llama_index.embeddings.openai import OpenAIEmbedding, OpenAIEmbeddingModelType
 from llama_index import ServiceContext
 
 from models.manager import PoliticalPartyManager

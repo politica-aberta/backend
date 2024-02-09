@@ -53,7 +53,8 @@ class PoliticalPartyManager:
             VectorStoreIndex,
         )
         self.multi_party_agent =  OpenAIAgent.from_tools(
-            tool_retriever=obj_index.as_retriever(similarity_top_k=3),
+            tool_retriever=obj_index.as_retriever(similarity_top_k=8),
             system_prompt=SYSTEM_PROMPT_MULTI_PARTY,
             verbose=True,
+            max_function_calls=8
         )
