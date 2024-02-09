@@ -3,11 +3,12 @@ from llama_index import VectorStoreIndex, StorageContext, SummaryIndex
 from llama_index.readers.base import BaseReader
 from llama_index.schema import Document
 from llama_index.tools import QueryEngineTool, ToolMetadata
-from llama_index.agent import OpenAIAgent
+from llama_index.prompts import PromptTemplate
+
 
 
 from . import parties
-from globals import service_context, LLM
+from globals import service_context
 from constants import DOCUMENTS, ELECTIONS, system_prompt_specific_party
 
 
@@ -122,7 +123,6 @@ class PoliticalParty:
             # )
 
             # llama_index/llama_index/prompts/default_prompts.py
-            from llama_index.prompts import PromptTemplate
 
             text_qa_template = (
                 f"O teu trabalho é ajudar o utilizador a encontrar informação sobre o programa político do {self.name} ({self.full_name}).\n"
