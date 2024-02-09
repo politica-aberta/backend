@@ -12,7 +12,7 @@ print(
     "initializing models with the following openai_key",
     os.environ.get("OPENAI_API_KEY"),
 )
-EMBED_MODEL = OpenAIEmbedding(embed_batch_size=500)
+EMBED_MODEL = OpenAIEmbedding(embed_batch_size=500, model=OpenAIEmbeddingModelType.TEXT_EMBED_3_LARGE)
 LLM = OpenAI(model="gpt-3.5-turbo-1106")
 
 

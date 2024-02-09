@@ -1,10 +1,10 @@
 from llama_index import StorageContext
-from llama_index.vector_stores import SupabaseVectorStore
+from llama_index.vector_stores import MilvusVectorStore
 
 from llama_index.readers import PDFReader
 
 
-from constants import SUPABASE_POSTGRES_CONNECTION_STRING
+# from constants import SUPABASE_POSTGRES_CONNECTION_STRING
 from models import parties
 from models.party import PoliticalParty
 
@@ -29,9 +29,13 @@ class DataLoader:
             print("Imported!")
 
             # docs = load_documents([get_document_path(name, doc) for doc in DOCUMENTS], f"Programa eleitoral do {name} para as eleições legislativas de 2022.")
-            vector_store = SupabaseVectorStore(
-                postgres_connection_string=SUPABASE_POSTGRES_CONNECTION_STRING,
+            # vector_store = SupabaseVectorStore(
+            #     postgres_connection_string=SUPABASE_POSTGRES_CONNECTION_STRING,
+            #     collection_name=party.name,
+            # )
+            vector_store = MilvusVectorStore(
                 collection_name=party.name,
+                dim=3072
             )
             storage_context = StorageContext.from_defaults(vector_store=vector_store)
             
