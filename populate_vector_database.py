@@ -1,3 +1,4 @@
+import os
 from llama_index import StorageContext
 from llama_index.vector_stores import MilvusVectorStore
 
@@ -35,7 +36,8 @@ class DataLoader:
             # )
             vector_store = MilvusVectorStore(
                 collection_name=party.name,
-                dim=3072
+                dim=3072,
+                uri=os.environ["MILVUS_URI"]
             )
             storage_context = StorageContext.from_defaults(vector_store=vector_store)
             

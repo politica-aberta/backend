@@ -58,8 +58,10 @@ class PoliticalParty:
     def import_party_files(self, reader: BaseReader):
         self.docs = []
         for doc in DOCUMENTS:
+            path = Path(f"./docs/{self.name}/{doc}.pdf") if Path(f"./docs/{self.name}/{doc}.pdf").exists() else Path(f"./docs/{self.name}/legislativas22.pdf")
+            print(path)
             out = reader.load_data(
-                file=Path(f"./docs/{self.name}/{doc}.pdf"),
+                file=path,
                 extra_info={
                     "description": f"Programa eleitoral do {self.full_name} para as Eleições {ELECTIONS[doc]}."
                 },

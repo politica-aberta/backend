@@ -1,3 +1,5 @@
+import os
+
 from llama_index.vector_stores import MilvusVectorStore
 from llama_index import VectorStoreIndex, SummaryIndex
 
@@ -16,7 +18,8 @@ def initialize_indexes():
         print("initializing " + name + "....")
 
         vector_store = MilvusVectorStore(
-            collection_name=name
+            collection_name=name,
+            uri=os.environ["MILVUS_URI"]
         )
 
         index = VectorStoreIndex.from_vector_store(vector_store=vector_store, service_context=service_context)

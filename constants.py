@@ -59,5 +59,11 @@ TOKEN_LIMIT = 10000
 # Document Data
 
 DOCUMENT_DIR = "docs/"
-DOCUMENTS = ["legislativas22"]
-ELECTIONS = {"legislativas22": "Legislativas de 2022"}
+DOCUMENTS = [
+    # "legislativas22",
+    "legislativas24"
+]
+ELECTIONS = {
+    # "legislativas22": "Legislativas de 2022",
+    "legislativas24": "Legislativas de 2024"
+}
