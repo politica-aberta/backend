@@ -6,7 +6,6 @@ from llama_index.tools import QueryEngineTool, ToolMetadata
 from llama_index.prompts import PromptTemplate
 from llama_index.postprocessor.cohere_rerank import CohereRerank
 
-
 from . import parties
 from globals import service_context
 from constants import (
@@ -141,9 +140,8 @@ class PoliticalParty:
             )
 
             cohere_rerank = CohereRerank(
-                api_key="",  # FIXME
                 model="rerank-multilingual-v2.0",
-                top_n=3,
+                top_n=4,
             )
 
             self.tool = QueryEngineTool(

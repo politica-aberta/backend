@@ -60,8 +60,6 @@ def process_multi_party_chat(
         chat_text, prefix_messages
     )
 
-    print(response.source_nodes)
-
     references = get_references(response)
     return response.response, references
 
