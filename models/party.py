@@ -149,7 +149,7 @@ class PoliticalParty:
                     similarity_top_k=10,
                     node_postprocessors=[cohere_rerank],
                     text_qa_template=PromptTemplate(
-                        text_qa_template, prompt_type=PromptType.QUESTION_ANSWER
+                        text_qa_template, prompt_type=PromptType.CUSTOM
                     ),
                 ),
                 metadata=ToolMetadata(

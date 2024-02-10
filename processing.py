@@ -3,6 +3,8 @@ from llama_index.llms import ChatMessage
 import logging
 from models.conversation import Conversation
 from llama_index import ServiceContext
+from llama_index.postprocessor.cohere_rerank import CohereRerank
+
 from globals import political_party_manager, service_context
 from constants import (
     SIMILARITY_TOP_K,
@@ -56,6 +58,7 @@ def process_multi_party_chat(
         ChatMessage(role=message["role"], content=message["message"])
         for message in previous_messages
     ]
+
     response = political_party_manager.multi_party_agent.chat(
         chat_text, prefix_messages
     )
@@ -83,7 +86,13 @@ def process_chat(
         system_prompt=system_prompt_specific_party(
             full_name=party.full_name, name=party.name
         ),
-        node_postprocessors=[ExcludeMetadataKeysNodePostprocessor()],
+        node_postprocessors=[
+            ExcludeMetadataKeysNodePostprocessor(),
+            CohereRerank(
+                model="rerank-multilingual-v2.0",
+                top_n=4,
+            ),
+        ],
         previous_messages_token_limit=TOKEN_LIMIT,
         service_context=service_context,
     )
