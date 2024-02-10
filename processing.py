@@ -7,7 +7,6 @@ from globals import political_party_manager, service_context
 from constants import (
     SIMILARITY_TOP_K,
     TOKEN_LIMIT,
-
     system_prompt_specific_party,
 )
 from llama_index.prompts import PromptTemplate
@@ -60,6 +59,8 @@ def process_multi_party_chat(
     response = political_party_manager.multi_party_agent.chat(
         chat_text, prefix_messages
     )
+
+    print(response.source_nodes)
 
     references = get_references(response)
     return response.response, references

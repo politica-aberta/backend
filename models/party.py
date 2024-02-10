@@ -4,12 +4,17 @@ from llama_index.readers.base import BaseReader
 from llama_index.schema import Document
 from llama_index.tools import QueryEngineTool, ToolMetadata
 from llama_index.prompts import PromptTemplate
-
+from llama_index.postprocessor.cohere_rerank import CohereRerank
 
 
 from . import parties
 from globals import service_context
-from constants import DOCUMENTS, ELECTIONS, system_prompt_specific_party
+from constants import (
+    DOCUMENTS,
+    ELECTIONS,
+    SYSTEM_PROMPT_MULTI_PARTY,
+    system_prompt_specific_party,
+)
 
 
 class PoliticalParty:
@@ -116,28 +121,38 @@ class PoliticalParty:
             #     "If the context isn't useful, return the original answer.\n"
             #     "Refined Answer: "
             # )
-            # from llama_index.prompts.prompt_type import PromptType
+            from llama_index.prompts.prompt_type import PromptType
 
             # DEFAULT_REFINE_PROMPT = PromptTemplate(
-            #     DEFAULT_REFINE_PROMPT_TMPL, prompt_type=PromptType.REFINE
+            # DEFAULT_REFINE_PROMPT_TMPL, prompt_type=PromptType.REFINE
             # )
 
             # llama_index/llama_index/prompts/default_prompts.py
 
             text_qa_template = (
                 f"O teu trabalho é ajudar o utilizador a encontrar informação sobre o programa político do {self.name} ({self.full_name}).\n"
-                "O seguinte contexto contém excertos do programa eleitoral.\n"
+                "O seguinte contexto contém excertos do programa eleitoral potencialmente relacionados.\n"
                 "---------------------\n"
                 "{context_str}\n"
                 "---------------------\n"
-                "Dado o contexto anterior, responde de forma fiel à seguinte pergunta do utilizador.\n"
+                "Dado o contexto anterior, responde de forma fiel à seguinte pergunta do utilizador. Evita reproduzir contexto que nao seja diretamente relevante para a pergunta.\n"
                 "Pergunta: Quais são as medidas/ideias do partido sobre o seguinte tópico: {query_str}\n"
                 "Resposta: "
             )
 
+            cohere_rerank = CohereRerank(
+                api_key="",  # FIXME
+                model="rerank-multilingual-v2.0",
+                top_n=3,
+            )
+
             self.tool = QueryEngineTool(
                 query_engine=self.index.as_query_engine(
-                    text_qa_template=PromptTemplate(text_qa_template)
+                    similarity_top_k=10,
+                    node_postprocessors=[cohere_rerank],
+                    text_qa_template=PromptTemplate(
+                        text_qa_template, prompt_type=PromptType.QUESTION_ANSWER
+                    ),
                 ),
                 metadata=ToolMetadata(
                     name=f"ferramenta_{self.name}",
