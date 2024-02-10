@@ -7,7 +7,7 @@ from globals import political_party_manager, service_context
 from constants import (
     SIMILARITY_TOP_K,
     TOKEN_LIMIT,
-    DECISION_TEMPLATE,
+
     system_prompt_specific_party,
 )
 from llama_index.prompts import PromptTemplate
@@ -75,7 +75,7 @@ def process_chat(
 
     conversation = Conversation(
         (
-            infer_chat_mode(chat_text, previous_messages)
+            infer_chat_mode(chat_text, previous_messages, service_context)
             if infer_chat_mode_flag
             else ChatMode.CONTEXT
         ),
@@ -102,23 +102,33 @@ def process_chat(
     return answer, references
 
 
-def infer_chat_mode(chat_text, previous_messages):
-    conversation = Conversation(
-        ChatMode.SIMPLE,
-        previous_messages_token_limit=TOKEN_LIMIT,
-        service_context=service_context,
+def infer_chat_mode(chat_text, previous_messages, service_context: ServiceContext):
+
+    # FIXME use previous_messages
+
+    query_gen_str = """
+    Para determinar o modo de resposta mais adequado, responde apenas com "simple" ou "context". 
+    Se a mensagem está diretamente relacionada com informações contidas nos documentos sobre partidos políticos, responda com "context". 
+    Se a mensagem aparenta estar relacionada apenas com a conversa em si e não requer informações dos documentos políticos, responda com "simple". 
+    Se nenhuma das opções acima se aplicar claramente, opte por responder com "context" para minimizar falsos positivos.
+    A mensagem é a seguinte:
+    
+    {chat_text}
+
+    Modo de resposta:
+    """
+
+    query_gen_prompt = PromptTemplate(query_gen_str)
+
+    chat_mode = service_context.llm.predict(
+        query_gen_prompt, previous_messages=previous_messages, chat_text=chat_text
     )
 
-    raw_answer = conversation.chat(
-        DECISION_TEMPLATE.format(message=chat_text), []
-    )  # CAN BE CHANGED TO IMPROVE PERFORMANCE
-
-    chat_mode = raw_answer.response
-
-    if chat_mode in (ChatMode.SIMPLE, ChatMode.CONTEXT):
-        return chat_mode
-
-    return ChatMode.CONTEXT
+    return (
+        chat_mode
+        if chat_mode in (ChatMode.SIMPLE, ChatMode.CONTEXT)
+        else ChatMode.CONTEXT
+    )
 
 
 def query_rewrite(query: str, previous_messages: list, service_context: ServiceContext):
@@ -138,8 +148,6 @@ def query_rewrite(query: str, previous_messages: list, service_context: ServiceC
     """
 
     query_gen_prompt = PromptTemplate(query_gen_str)
-
-    previous_messages
 
     rewritten_q = service_context.llm.predict(
         query_gen_prompt, previous_messages=previous_messages, query=query
