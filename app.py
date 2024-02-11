@@ -5,6 +5,7 @@ from functools import wraps
 from flask import Response, stream_with_context
 import json
 from constants import SUPABASE_URL, SUPABASE_ANON_KEY
+from populate_vector_database import DataLoader
 from utils import get_user_id
 from config import initialize_indexes
 from processing import process_chat, process_multi_party_chat
@@ -115,4 +116,9 @@ def health():
 
 
 with app.app_context():
-    initialize_indexes()
+    try:
+        initialize_indexes()
+    except ValueError:
+        data_loader = DataLoader()
+        data_loader.populate_vector_database()
+        initialize_indexes()
