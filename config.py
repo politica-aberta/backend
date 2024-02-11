@@ -39,9 +39,6 @@ def initialize_indexes():
     political_party_manager.generate_multi_party_agent()
     
 if __name__ == "__main__":
-    try:
-        initialize_indexes()
-    except ValueError:
-        data_loader = DataLoader()
-        data_loader.populate_vector_database()
-        initialize_indexes()
+    data_loader = DataLoader()
+    data_loader.populate_vector_database()
+    initialize_indexes()
