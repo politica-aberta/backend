@@ -6,6 +6,7 @@ from llama_index import VectorStoreIndex, SummaryIndex
 from models import parties
 from models.party import PoliticalParty
 from globals import political_party_manager, service_context
+from populate_vector_database import DataLoader
 # from llama_index.readers import PDFReader
 
 
@@ -38,4 +39,9 @@ def initialize_indexes():
     political_party_manager.generate_multi_party_agent()
     
 if __name__ == "__main__":
-    initialize_indexes()
+    try:
+        initialize_indexes()
+    except ValueError:
+        data_loader = DataLoader()
+        data_loader.populate_vector_database()
+        initialize_indexes()
