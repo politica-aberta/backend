@@ -1,6 +1,8 @@
 from llama_index.chat_engine.types import ChatMode
 from llama_index.llms import ChatMessage
 import logging
+import fitz
+import requests
 from models.conversation import Conversation
 from llama_index import ServiceContext
 from globals import political_party_manager, service_context
@@ -24,28 +26,46 @@ def get_references(raw_answer, party_name=None):
         path = f"{tokens[1].lower()}-{tokens[2]}" if len(tokens) == 3 else path
         return supabase_prefix + path, tokens[1]
 
-    parties: dict[str, list[str, set[int]]] = {}
+    parties: dict[str, list[str, dict[int, list[str]]]] = {}
 
     for node in raw_answer.source_nodes:
-        if "file_name" in node.node.metadata:
-            document, party = convert_file_format(node.node.metadata["file_name"])
+        if "file_path" in node.metadata:
+            document, party = convert_file_format(node.metadata["file_path"])
             if party not in parties:
-                parties[party] = [document, set()]
+                parties[party] = [document, {}]
 
-            if "page_label" in node.node.metadata:
-                parties[party][1].add(int(node.node.metadata["page_label"]))
-
+            if "page_number" in node.metadata:
+                page_number = int(node.metadata["page_number"])
+                if page_number in parties[party][1]:
+                    parties[party][1][page_number].append(node.text)
+                else:
+                    parties[party][1][page_number] = [node.text]
+    # TODO: sort by doc as well (?)
     references = [
         {
             "party": party_name if party_name else party,
             "document": pages[0],
-            "pages": list(pages[1]),
+            "pages": pages[1],
         }
         for party, pages in parties.items()
     ]
 
     return references
 
+# TODO: Can be optimized
+def get_highlight_boxes(references):
+    for ref in references:
+        response = requests.get(ref["document"])
+        response.raise_for_status() 
+
+        doc = fitz.open(stream=response.content, filetype="pdf")
+        for page, text_excerpts in ref["pages"].items():
+            highlight_boxes = []
+            for text in text_excerpts:
+                highlight_boxes.extend([
+                    [rect.x0, rect.y0, rect.x1, rect.y1]
+                    for rect in  doc[page-1].search_for(text)])
+            ref["pages"][page] = highlight_boxes
 
 def process_multi_party_chat(
     parties, chat_text, previous_messages, infer_chat_mode_flag, stream=False
@@ -99,6 +119,8 @@ def process_chat(
         answer = raw_answer.response
 
     references = get_references(raw_answer=raw_answer, party_name=party_name)
+
+    get_highlight_boxes(references)
 
     return answer, references
 

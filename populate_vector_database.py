@@ -1,16 +1,16 @@
 from llama_index import StorageContext
 from llama_index.vector_stores import MilvusVectorStore
 
-from llama_index.readers import PDFReader
 
 
 # from constants import SUPABASE_POSTGRES_CONNECTION_STRING
+from utils import MuPDFReader
 from models import parties
 from models.party import PoliticalParty
 
 
 class DataLoader:
-    loader = PDFReader()
+    loader = MuPDFReader()
     
     def __init__(self):
         self.all_docs = []
