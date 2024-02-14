@@ -6,7 +6,6 @@ from llama_index.tools import QueryEngineTool, ToolMetadata
 from llama_index.prompts import PromptTemplate
 from llama_index.postprocessor.cohere_rerank import CohereRerank
 
-
 from . import parties
 from globals import service_context
 from constants import (
@@ -59,8 +58,10 @@ class PoliticalParty:
     def import_party_files(self, reader: BaseReader):
         self.docs = []
         for doc in DOCUMENTS:
+            path = Path(f"./docs/{self.name}/{doc}.pdf") if Path(f"./docs/{self.name}/{doc}.pdf").exists() else Path(f"./docs/{self.name}/legislativas22.pdf")
+            print(path)
             out = reader.load_data(
-                file=Path(f"./docs/{self.name}/{doc}.pdf"),
+                file=path,
                 extra_info={
                     "description": f"Programa eleitoral do {self.full_name} para as Eleições {ELECTIONS[doc]}."
                 },
@@ -141,9 +142,8 @@ class PoliticalParty:
             )
 
             cohere_rerank = CohereRerank(
-                api_key="",  # FIXME
                 model="rerank-multilingual-v2.0",
-                top_n=3,
+                top_n=4,
             )
 
             self.tool = QueryEngineTool(
@@ -151,7 +151,7 @@ class PoliticalParty:
                     similarity_top_k=10,
                     node_postprocessors=[cohere_rerank],
                     text_qa_template=PromptTemplate(
-                        text_qa_template, prompt_type=PromptType.QUESTION_ANSWER
+                        text_qa_template, prompt_type=PromptType.CUSTOM
                     ),
                 ),
                 metadata=ToolMetadata(
