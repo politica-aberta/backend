@@ -1,8 +1,7 @@
-from llama_index import VectorStoreIndex
-from llama_index.objects import ObjectIndex, SimpleToolNodeMapping
+
 from llama_index.agent import OpenAIAgent
 from llama_index.tools import QueryEngineTool
-from constants import SYSTEM_PROMPT_MULTI_PARTY, SIMILARITY_TOP_K
+from constants import SYSTEM_PROMPT_MULTI_PARTY
 
 
 class PoliticalPartyManager:

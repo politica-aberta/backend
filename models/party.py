@@ -11,8 +11,6 @@ from globals import service_context
 from constants import (
     DOCUMENTS,
     ELECTIONS,
-    SYSTEM_PROMPT_MULTI_PARTY,
-    system_prompt_specific_party,
 )
 
 
@@ -158,7 +156,7 @@ class PoliticalParty:
                     name=f"ferramenta_{self.name}",
                     description=(
                         "Útil para questões relacionada com "
-                        f"o programa político do {self.full_name} ({self.name})."
+                        f"o programa político do partido {self.full_name} ({self.name})."
                     ),
                 ),
             )
