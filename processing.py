@@ -84,14 +84,15 @@ def process_multi_party_chat(
 ):
     if not political_party_manager.multi_party_agent:
         raise Exception("No multi-party agent found.")
+
+    out = query_rewrite(chat_text, previous_messages, service_context)
+
     prefix_messages = [
         ChatMessage(role=message["role"], content=message["message"])
         for message in previous_messages
     ]
 
-    response = political_party_manager.multi_party_agent.chat(
-        chat_text, prefix_messages
-    )
+    response = political_party_manager.multi_party_agent.chat(out, prefix_messages)
 
     references = get_references(response)
     get_highlight_boxes(references)
@@ -102,7 +103,6 @@ def process_chat(
     party_name, chat_text, previous_messages, infer_chat_mode_flag, stream=False
 ):
     party = political_party_manager.get(party_name)
-    # TODO: Should we use ChatMode.BEST??
 
     out = query_rewrite(chat_text, previous_messages, service_context)
 
@@ -181,6 +181,7 @@ def query_rewrite(query: str, previous_messages: list, service_context: ServiceC
     {previous_messages}
 
     Se o utilizador fizer uma referência ao histórico (por exemplo: "repete o ponto x", "clarifica o último tópico"), repete o respetivo contexto relevante na nova pergunta.
+    Especifica qual o partido em questao na nova pergunta.
     Pergunta do utilizador:
 
     {query}
