@@ -1,4 +1,4 @@
-from llama_index.agent import ParallelAgentRunner, OpenAIAgent
+from llama_index.agent import ParallelAgentRunner
 from llama_index.agent.openai.step import OpenAIAgentWorker
 from llama_index.llms.base import ChatMessage
 
