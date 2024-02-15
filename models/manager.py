@@ -1,15 +1,17 @@
-from llama_index.agent import ParallelAgentRunner
-from llama_index.agent.openai.step import OpenAIAgentWorker
-from llama_index.llms.base import ChatMessage
+from llama_index.core.agent import ParallelAgentRunner
 
-from llama_index.callbacks import (
+from llama_index.agent.openai.step import OpenAIAgentWorker
+from llama_index.core.chat_engine.types import ChatMessage
+
+from llama_index.core.callbacks import (
     CallbackManager,
     LlamaDebugHandler,
 
 )
 
-from llama_index.tools import QueryEngineTool
+from llama_index.core.tools import QueryEngineTool
 from constants import SYSTEM_PROMPT_MULTI_PARTY
+from llama_index.core.callbacks import CallbackManager, LlamaDebugHandler
 
 
 class PoliticalPartyManager:

@@ -1,13 +1,15 @@
 from pathlib import Path
-from llama_index import VectorStoreIndex, StorageContext, SummaryIndex
-from llama_index.readers.base import BaseReader
-from llama_index.schema import Document
-from llama_index.tools import QueryEngineTool, ToolMetadata
-from llama_index.prompts import PromptTemplate
+from llama_index.core.indices import VectorStoreIndex, SummaryIndex
+from llama_index.core.storage import StorageContext
+from llama_index.core.readers.base import BaseReader
+from llama_index.core.schema import Document
+from llama_index.core.tools import QueryEngineTool, ToolMetadata
+from llama_index.core.prompts import PromptTemplate
+from llama_index.core.prompts.prompt_type import PromptType
 from llama_index.postprocessor.cohere_rerank import CohereRerank
 
+
 from . import parties
-from globals import service_context
 from constants import (
     DOCUMENTS,
     ELECTIONS,
@@ -31,7 +33,6 @@ class PoliticalParty:
         return VectorStoreIndex.from_documents(
             docs,
             storage_context=storage_context,
-            service_context=service_context,
             show_progress=True,
         )
 
@@ -61,7 +62,7 @@ class PoliticalParty:
             if not path.exists():
                 path = Path(f"./docs/{self.name}/legislativas22.pdf")
                 desc = "Legislativas de 2022"
-                
+
             out = reader.load_data(
                 file=path,
                 extra_info={
@@ -124,7 +125,6 @@ class PoliticalParty:
             #     "If the context isn't useful, return the original answer.\n"
             #     "Refined Answer: "
             # )
-            from llama_index.prompts.prompt_type import PromptType
 
             # DEFAULT_REFINE_PROMPT = PromptTemplate(
             # DEFAULT_REFINE_PROMPT_TMPL, prompt_type=PromptType.REFINE
@@ -150,7 +150,7 @@ class PoliticalParty:
 
             self.tool = QueryEngineTool(
                 query_engine=self.index.as_query_engine(
-                    similarity_top_k=10,
+                    similarity_top_k=16,
                     node_postprocessors=[cohere_rerank],
                     text_qa_template=PromptTemplate(
                         text_qa_template, prompt_type=PromptType.CUSTOM

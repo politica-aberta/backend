@@ -1,10 +1,8 @@
 import os
-from llama_index import SimpleDirectoryReader, Document
-from llama_index.readers.base import BaseReader
-from llama_index import VectorStoreIndex
-from llama_index.schema import Document
+from llama_index.core import SimpleDirectoryReader, Document
+from llama_index.core.readers.base import BaseReader
+from llama_index.core.schema import Document
 
-from globals import service_context
 from constants import DOCUMENT_DIR
 from pathlib import Path
 

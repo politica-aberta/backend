@@ -1,6 +1,6 @@
 import os
-from llama_index import StorageContext
-from llama_index.vector_stores import MilvusVectorStore
+from llama_index.core import StorageContext
+from llama_index.vector_stores.milvus import MilvusVectorStore
 
 
 

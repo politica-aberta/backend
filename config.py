@@ -1,7 +1,7 @@
 import os
 
-from llama_index.vector_stores import MilvusVectorStore
-from llama_index import VectorStoreIndex, SummaryIndex
+from llama_index.vector_stores.milvus import MilvusVectorStore
+from llama_index.core.indices import VectorStoreIndex, SummaryIndex
 
 from models import parties
 from models.party import PoliticalParty
