@@ -16,6 +16,4 @@ EXPOSE 80
 
 # Set the environment variable
 
-
-# Start the Flask app with Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:80", "--timeout", "300", "app:app"]
+CMD ["uvicorn", "--port", "80",  "app:app"]
