@@ -54,22 +54,28 @@ def get_references(raw_answer, party_name=None):
 
     return references
 
+
 # TODO: Can be optimized
 def get_highlight_boxes(references):
     for ref in references:
-        party, doc_name =  ref["document"].rsplit("/",1)[1].split("-", 1)
+        party, doc_name = ref["document"].rsplit("/", 1)[1].split("-", 1)
         doc = fitz.open(Path(f"./docs/{party.upper()}/{doc_name}"))
         for page, text_excerpts in ref["pages"].items():
-            page_width = doc[page-1].rect.x1
-            page_height = doc[page-1].rect.y1
+            page_width = doc[page - 1].rect.x1
+            page_height = doc[page - 1].rect.y1
             highlight_boxes = []
             for text in text_excerpts:
-                highlight_boxes.extend([
-                    [rect.x0 / page_width * 100, 
-                     rect.y0 / page_height * 100, 
-                     (rect.x1 - rect.x0) / page_width * 100, 
-                     (rect.y1 - rect.y0) / page_height * 100]
-                    for rect in doc[page-1].search_for(text)])
+                highlight_boxes.extend(
+                    [
+                        [
+                            rect.x0 / page_width * 100,
+                            rect.y0 / page_height * 100,
+                            (rect.x1 - rect.x0) / page_width * 100,
+                            (rect.y1 - rect.y0) / page_height * 100,
+                        ]
+                        for rect in doc[page - 1].search_for(text)
+                    ]
+                )
             ref["pages"][page] = highlight_boxes
 
 async def process_multi_party_chat(
@@ -88,6 +94,7 @@ async def process_multi_party_chat(
     response = await political_party_manager.multi_party_agent.achat(out, prefix_messages)
 
     references = get_references(response)
+    get_highlight_boxes(references)
     return response.response, references
 
 
