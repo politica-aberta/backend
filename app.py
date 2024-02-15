@@ -117,8 +117,8 @@ def health():
 
 with app.app_context():
     try:
-        initialize_indexes()
-    except ValueError:
         data_loader = DataLoader()
         data_loader.populate_vector_database()
+        initialize_indexes()
+    except ValueError:
         initialize_indexes()
