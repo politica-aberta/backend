@@ -78,8 +78,8 @@ def get_highlight_boxes(references):
                 )
             ref["pages"][page] = highlight_boxes
 
+async def process_multi_party_chat(
 
-def process_multi_party_chat(
     parties, chat_text, previous_messages, infer_chat_mode_flag, stream=False
 ):
     if not political_party_manager.multi_party_agent:
@@ -88,11 +88,11 @@ def process_multi_party_chat(
     out = query_rewrite(chat_text, previous_messages, service_context)
 
     prefix_messages = [
-        ChatMessage(role=message["role"], content=message["message"])
+        ChatMessage(role=message.role, content=message.message)
         for message in previous_messages
     ]
 
-    response = political_party_manager.multi_party_agent.chat(out, prefix_messages)
+    response = await political_party_manager.multi_party_agent.achat(out, prefix_messages)
 
     references = get_references(response)
     get_highlight_boxes(references)

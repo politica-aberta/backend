@@ -1,5 +1,13 @@
+from llama_index.agent import ParallelAgentRunner
+from llama_index.agent.openai.step import OpenAIAgentWorker
+from llama_index.llms.base import ChatMessage
 
-from llama_index.agent import OpenAIAgent
+from llama_index.callbacks import (
+    CallbackManager,
+    LlamaDebugHandler,
+
+)
+
 from llama_index.tools import QueryEngineTool
 from constants import SYSTEM_PROMPT_MULTI_PARTY
 
@@ -44,14 +52,31 @@ class PoliticalPartyManager:
                 raise Exception("no tool for " + p)
             all_tools.append(self.political_parties[p].tool)
 
-        from llama_index.callbacks import CallbackManager, LlamaDebugHandler
-
         llama_debug = LlamaDebugHandler(print_trace_on_end=True)
+
         callback_manager = CallbackManager([llama_debug])
-        self.multi_party_agent = OpenAIAgent.from_tools(
+
+        agent_worker = OpenAIAgentWorker.from_tools(
             tools=all_tools,
-            system_prompt=SYSTEM_PROMPT_MULTI_PARTY,
-            callback_manager=callback_manager,
+            llm=self.llm,
             verbose=True,
+            callback_manager=callback_manager,
             max_function_calls=8,
+            prefix_messages=[
+                ChatMessage(content=SYSTEM_PROMPT_MULTI_PARTY, role="system")
+            ],
         )
+
+        self.multi_party_agent = ParallelAgentRunner(
+            agent_worker=agent_worker,
+            callback_manager=callback_manager,
+            llm=self.llm,
+        )
+
+        # self.multi_party_agent = OpenAIAgent.from_tools(
+        #     tools=all_tools,
+        #     system_prompt=SYSTEM_PROMPT_MULTI_PARTY,
+        #     llm=self.llm,
+        #     verbose=True,
+        #     callback_manager=callback_manager,
+        # )
