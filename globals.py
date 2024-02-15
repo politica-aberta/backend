@@ -1,8 +1,8 @@
 import os
 
-from llama_index.llms import OpenAI
+from llama_index.llms.openai import OpenAI
 from llama_index.embeddings.openai import OpenAIEmbedding, OpenAIEmbeddingModelType
-from llama_index import ServiceContext
+from llama_index.core.service_context import ServiceContext
 
 from models.manager import PoliticalPartyManager
 
@@ -15,6 +15,7 @@ print(
 EMBED_MODEL = OpenAIEmbedding(
     embed_batch_size=500, model=OpenAIEmbeddingModelType.TEXT_EMBED_3_LARGE
 )
+
 
 LLM = OpenAI(model="gpt-3.5-turbo-0125")
 

@@ -1,11 +1,11 @@
-from llama_index.chat_engine.types import ChatMode
-from llama_index.llms import ChatMessage
+from llama_index.core.chat_engine.types import ChatMode, ChatMessage
+
 import logging
 import fitz
 from pathlib import Path
 from models.conversation import Conversation
-from llama_index import ServiceContext
 from llama_index.postprocessor.cohere_rerank import CohereRerank
+from llama_index.core.service_context import ServiceContext
 
 from globals import political_party_manager, service_context
 from constants import (
@@ -13,7 +13,7 @@ from constants import (
     TOKEN_LIMIT,
     system_prompt_specific_party,
 )
-from llama_index.prompts import PromptTemplate
+from llama_index.core.prompts import PromptTemplate
 
 
 from postprocessor import ExcludeMetadataKeysNodePostprocessor
@@ -107,11 +107,7 @@ def process_chat(
     out = query_rewrite(chat_text, previous_messages, service_context)
 
     conversation = Conversation(
-        (
-            infer_chat_mode(chat_text, previous_messages, service_context)
-            if infer_chat_mode_flag
-            else ChatMode.CONTEXT
-        ),
+        (ChatMode.CONTEXT),
         party=party,
         similarity_top_k=SIMILARITY_TOP_K,
         system_prompt=system_prompt_specific_party(
@@ -141,35 +137,6 @@ def process_chat(
     get_highlight_boxes(references)
 
     return answer, references
-
-
-def infer_chat_mode(chat_text, previous_messages, service_context: ServiceContext):
-
-    # FIXME use previous_messages
-
-    query_gen_str = """
-    Para determinar o modo de resposta mais adequado, responde apenas com "simple" ou "context". 
-    Se a mensagem está diretamente relacionada com informações contidas nos documentos sobre partidos políticos, responda com "context". 
-    Se a mensagem aparenta estar relacionada apenas com a conversa em si e não requer informações dos documentos políticos, responda com "simple". 
-    Se nenhuma das opções acima se aplicar claramente, opte por responder com "context" para minimizar falsos positivos.
-    A mensagem é a seguinte:
-    
-    {chat_text}
-
-    Modo de resposta:
-    """
-
-    query_gen_prompt = PromptTemplate(query_gen_str)
-
-    chat_mode = service_context.llm.predict(
-        query_gen_prompt, previous_messages=previous_messages, chat_text=chat_text
-    )
-
-    return (
-        chat_mode
-        if chat_mode in (ChatMode.SIMPLE, ChatMode.CONTEXT)
-        else ChatMode.CONTEXT
-    )
 
 
 def query_rewrite(query: str, previous_messages: list, service_context: ServiceContext):

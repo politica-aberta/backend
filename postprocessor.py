@@ -1,7 +1,7 @@
 
-from llama_index import QueryBundle
-from llama_index.postprocessor.types import BaseNodePostprocessor
-from llama_index.schema import NodeWithScore
+from llama_index.core import QueryBundle
+from llama_index.core.postprocessor.types import BaseNodePostprocessor
+from llama_index.core.schema import NodeWithScore
 from typing import List, Optional
 
 
