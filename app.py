@@ -13,11 +13,10 @@ import json
 from constants import SUPABASE_URL, SUPABASE_ANON_KEY
 import nest_asyncio
 
-
 supabase = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-
 @asynccontextmanager
+
 async def lifespan(app: FastAPI):
     nest_asyncio.apply()
     initialize_indexes()
