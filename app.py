@@ -1,101 +1,93 @@
-import logging
-from flask import Flask, request, jsonify
-from supabase import create_client, Client
-from functools import wraps
-from flask import Response, stream_with_context
-import json
-from constants import SUPABASE_URL, SUPABASE_ANON_KEY
-from utils import get_user_id
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, HTTPException, Request, Depends, Response
+
+from pydantic import BaseModel
+from typing import List, Optional
+from supabase import create_client
+
 from config import initialize_indexes
 from processing import process_chat, process_multi_party_chat
-
-app = Flask(__name__)
-
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
-
-
-def require_auth(supabase: Client):
-    def decorator(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            token = request.json.get("access_token")
-            if not token:
-                return jsonify({"error": "No token provided"}), 401
-            try:
-                user = supabase.auth.get_user(token)
-            except Exception as e:
-                return jsonify({"error": "Invalid token"}), 401
-            kwargs["user"] = user
-            return f(*args, **kwargs)
-
-        return decorated_function
-
-    return decorator
+import json
+from constants import SUPABASE_URL, SUPABASE_ANON_KEY
+import nest_asyncio
 
 
-@app.route("/multi-chat", methods=["POST"])
-@require_auth(supabase)
-def multi_chat(**kwargs):
-    user = kwargs.get("user")
-    user_id = get_user_id(user)
+supabase = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    nest_asyncio.apply()
+    initialize_indexes()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
+
+
+class PreviousMessage(BaseModel):
+    role: str
+    message: str
+    references: Optional[List[dict]] = None
+
+
+class ChatRequest(BaseModel):
+    message: str
+    previous_messages: List[PreviousMessage]
+    infer_chat_mode: bool
+
+
+class StreamChatRequest(BaseModel):
+    political_party: str
+    chat: str
+    previous_messages: List[str]
+    infer_chat_mode: bool
+
+
+async def require_auth(request: Request):
+    json_request = await request.json()
+    token = json_request.get("access_token")
+    if not token:
+        raise HTTPException(status_code=401, detail="No token provided")
     try:
-        data = request.json
-        logging.info(f"Request data: {data}")
-        chat_text = data["message"]
-        previous_messages = data["previous_messages"]
-        infer_chat_mode = data["infer_chat_mode"]
-    except KeyError:
-        return jsonify({"error": "Invalid input data"}), 400
+        user = supabase.auth.get_user(token)
+        return user
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid token")
 
-    answer, references = process_multi_party_chat(
-        None, chat_text, previous_messages, infer_chat_mode
+
+@app.post("/multi-chat")
+async def multi_chat(request: ChatRequest, user: dict = Depends(require_auth)):
+
+    answer, references = await process_multi_party_chat(
+        None, request.message, request.previous_messages, request.infer_chat_mode
     )
+    return {"references": references, "message": answer}
 
-    return jsonify({"references": references, "message": answer})
 
-
-@app.route("/chat", methods=["POST"])
-@require_auth(supabase)
-def chat(**kwargs):
-    user = kwargs.get("user")
-    user_id = get_user_id(user)
-    try:
-        data = request.json
-        logging.info(f"Request data: {data}")
-        chat_text = data["message"]
-        political_party: str = data["party"]
-        previous_messages = data["previous_messages"]
-        infer_chat_mode = data["infer_chat_mode"]
-    except KeyError:
-        return jsonify({"error": "Invalid input data"}), 400
-
-    if not political_party or type(political_party) is not str:
-        return jsonify({"error": "Choose a party"}), 400
+@app.post("/chat")
+async def chat(request: ChatRequest, user: dict = Depends(require_auth)):
+    if not request.party or type(request.party) is not str:
+        raise HTTPException(status_code=400, detail="Choose a party")
 
     answer, references = process_chat(
-        political_party, chat_text, previous_messages, infer_chat_mode
+        request.party,
+        request.message,
+        request.previous_messages,
+        request.infer_chat_mode,
     )
 
-    return jsonify({"references": references, "message": answer})
+    return {"references": references, "message": answer}
 
 
-@app.route("/stream-chat", methods=["POST"])
-# @require_auth(supabase)
-def stream_chat(**kwargs):
-    # user = kwargs.get("user")
-    # user_id = get_user_id(user)
-
-    try:
-        data = request.json
-        political_party = data["political_party"]
-        chat_text = data["chat"]
-        previous_messages = data["previous_messages"]
-        infer_chat_mode = data["infer_chat_mode"]
-    except KeyError:
-        return jsonify({"error": "Invalid input data"}), 400
-
+@app.post("/stream-chat")
+async def stream_chat(request: StreamChatRequest):
     answer, references = process_chat(
-        political_party, chat_text, previous_messages, infer_chat_mode, stream=True
+        request.political_party,
+        request.chat,
+        request.previous_messages,
+        request.infer_chat_mode,
+        stream=True,
     )
 
     def generate_stream_chat_response(coordinates, answer):
@@ -105,14 +97,11 @@ def stream_chat(**kwargs):
         yield '"}'
 
     return Response(
-        stream_with_context(generate_stream_chat_response(references, answer))
-    )  # Minor issue with different formatting (not encoded)
+        content=generate_stream_chat_response(references, answer),
+        media_type="application/json",
+    )
 
 
-@app.route("/health", methods=["GET"])
+@app.get("/health")
 def health():
-    return jsonify({"status": "OK"})
-
-
-with app.app_context():
-    initialize_indexes()
+    return {"status": "OK"}
