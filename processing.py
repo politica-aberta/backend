@@ -79,6 +79,7 @@ def get_highlight_boxes(references):
             ref["pages"][page] = highlight_boxes
 
 async def process_multi_party_chat(
+
     parties, chat_text, previous_messages, infer_chat_mode_flag, stream=False
 ):
     if not political_party_manager.multi_party_agent:

@@ -1,9 +1,11 @@
+
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request, Depends, Response
 
 from pydantic import BaseModel
 from typing import List, Optional
 from supabase import create_client
+
 
 from config import initialize_indexes
 from processing import process_chat, process_multi_party_chat
