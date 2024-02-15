@@ -37,7 +37,8 @@ class DataLoader:
             vector_store = MilvusVectorStore(
                 collection_name=party.name,
                 dim=3072,
-                uri=os.environ["MILVUS_URI"]
+                uri=os.environ["MILVUS_URI"],
+                overwrite=True
             )
             storage_context = StorageContext.from_defaults(vector_store=vector_store)
             
