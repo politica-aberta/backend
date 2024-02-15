@@ -15,8 +15,6 @@ print(
 EMBED_MODEL = OpenAIEmbedding(
     embed_batch_size=500, model=OpenAIEmbeddingModelType.TEXT_EMBED_3_LARGE
 )
-
-
 LLM = OpenAI(model="gpt-3.5-turbo-0125")
 
 political_party_manager = PoliticalPartyManager(llm=LLM)

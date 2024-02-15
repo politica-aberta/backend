@@ -1,4 +1,3 @@
-
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request, Depends, Response
 
@@ -15,8 +14,8 @@ import nest_asyncio
 
 supabase = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-@asynccontextmanager
 
+@asynccontextmanager
 async def lifespan(app: FastAPI):
     nest_asyncio.apply()
     initialize_indexes()

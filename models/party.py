@@ -7,7 +7,7 @@ from llama_index.core.tools import QueryEngineTool, ToolMetadata
 from llama_index.core.prompts import PromptTemplate
 from llama_index.core.prompts.prompt_type import PromptType
 from llama_index.postprocessor.cohere_rerank import CohereRerank
-
+from globals import service_context
 
 from . import parties
 from constants import (
@@ -33,13 +33,8 @@ class PoliticalParty:
         return VectorStoreIndex.from_documents(
             docs,
             storage_context=storage_context,
+            service_context=service_context,
             show_progress=True,
-        )
-
-    @staticmethod
-    def docs_to_summary_index(docs) -> SummaryIndex:
-        return SummaryIndex.from_documents(
-            docs, service_context=service_context, show_progress=True
         )
 
     def generate_index(self, storage_context: StorageContext):
