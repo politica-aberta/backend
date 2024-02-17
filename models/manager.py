@@ -1,6 +1,6 @@
 from llama_index.core.agent import ParallelAgentRunner
 
-from llama_index.agent.openai.step import OpenAIAgentWorker
+from openai_agent_worker import OpenAIAgentWorker
 from llama_index.core.chat_engine.types import ChatMessage
 
 from llama_index.core.callbacks import (
@@ -61,8 +61,8 @@ class PoliticalPartyManager:
         agent_worker = OpenAIAgentWorker.from_tools(
             tools=all_tools,
             llm=self.llm,
-            verbose=True,
-            callback_manager=callback_manager,
+            # verbose=True,
+            # callback_manager=callback_manager,
             max_function_calls=8,
             prefix_messages=[
                 ChatMessage(content=SYSTEM_PROMPT_MULTI_PARTY, role="system")
