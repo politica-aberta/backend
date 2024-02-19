@@ -19,8 +19,8 @@ supabase = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     nest_asyncio.apply()
-    data_loader = DataLoader()
-    data_loader.populate_vector_database()
+    # data_loader = DataLoader()
+    # data_loader.populate_vector_database()
     initialize_indexes()
     yield
 
