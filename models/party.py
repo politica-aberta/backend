@@ -54,9 +54,9 @@ class PoliticalParty:
         for doc in DOCUMENTS:
             path = Path(f"./docs/{self.name}/{doc}.pdf")
             desc = ELECTIONS[doc]
-            if not path.exists():
-                path = Path(f"./docs/{self.name}/legislativas22.pdf")
-                desc = "Legislativas de 2022"
+            # if not path.exists():
+            #     path = Path(f"./docs/{self.name}/legislativas22.pdf")
+            #     desc = "Legislativas de 2022"
 
             out = reader.load_data(
                 file=path,

@@ -7,6 +7,7 @@ from supabase import create_client
 
 
 from config import initialize_indexes
+from populate_vector_database import DataLoader
 from processing import process_chat, process_multi_party_chat
 import json
 from constants import SUPABASE_URL, SUPABASE_ANON_KEY
@@ -18,6 +19,8 @@ supabase = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     nest_asyncio.apply()
+    data_loader = DataLoader()
+    data_loader.populate_vector_database()
     initialize_indexes()
     yield
 

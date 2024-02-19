@@ -21,8 +21,8 @@ from postprocessor import ExcludeMetadataKeysNodePostprocessor
 
 def get_references(raw_answer, party_name=None):
     def convert_file_format(path):
-        """some docs have a file format of 'docs/{party}/legislativas22.pdf}
-        while the supposed format is {party.lower()}/legislativas22.pdf}"""
+        """some docs have a file format of 'docs/{party}/legislativas24.pdf}
+        while the supposed format is {party.lower()}/legislativas24.pdf}"""
         supabase_prefix = "https://dzwdgfmvuevjqjutrpye.supabase.co/storage/v1/object/public/documents/"
         tokens = path.split("/")
         path = f"{tokens[1].lower()}-{tokens[2]}" if len(tokens) == 3 else path
