@@ -14,7 +14,7 @@ def initialize_indexes():
     
     # loader = PDFReader()
 
-    for name, fullname in parties.items():
+    for name in parties.keys():
         
         print("initializing " + name + "....")
 

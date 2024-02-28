@@ -16,7 +16,7 @@ class DataLoader:
     def __init__(self):
         self.all_docs = []
         self.parties: list[PoliticalParty] = []
-        for key, val in parties.items():
+        for key in parties.keys():
             self.parties.append(PoliticalParty(party_name=key, index = None))
     
     
