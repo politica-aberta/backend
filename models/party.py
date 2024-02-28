@@ -21,7 +21,9 @@ class PoliticalParty:
         self, party_name: str, index, summary_index: SummaryIndex | None = None
     ):
         self.name = party_name
-        self.full_name = parties[party_name]
+        self.full_name = parties[party_name].get("full_name")
+        self.coalition = parties[party_name].get("coalition")
+        self.leader = parties[party_name].get("leader")
         self.index = index
         self.summary_index = summary_index
         self.agent = None
@@ -128,7 +130,7 @@ class PoliticalParty:
             # llama_index/llama_index/prompts/default_prompts.py
 
             text_qa_template = (
-                f"O teu trabalho é ajudar o utilizador a encontrar informação sobre o programa político do {self.name} ({self.full_name}).\n"
+                f"O teu trabalho é ajudar o utilizador a encontrar informação sobre o programa político do {self.name} ({self.full_name}), liderado por {self.leader}{(', que é uma coligação dos partidos ' + ' e '.join(self.coalition)) if self.coalition else ''}.\n"
                 "O seguinte contexto contém excertos do programa eleitoral potencialmente relacionados.\n"
                 "---------------------\n"
                 "{context_str}\n"
@@ -155,7 +157,7 @@ class PoliticalParty:
                     name=f"ferramenta_{self.name}",
                     description=(
                         "Útil para questões relacionada com "
-                        f"o programa político do partido {self.full_name} ({self.name})."
+                        f"o programa político do partido {self.full_name} ({self.name}), liderado por {self.leader}{(', que é uma coligação dos partidos ' + ' e '.join(self.coalition)) if self.coalition else ''}."
                     ),
                 ),
             )
